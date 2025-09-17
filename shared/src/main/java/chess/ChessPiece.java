@@ -74,6 +74,7 @@ public class ChessPiece {
                     int newRow = nextPos.getRow();
                     int newCol = nextPos.getColumn();
                     if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+
                         ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                         moves.add(newMove);
                         newPos = nextPos;
@@ -83,25 +84,18 @@ public class ChessPiece {
                     }
                     else{keepChecking=false;}
                 }
-
                 }
             return moves;
             }
-
-
-
-
-
     };
-
     private static class RuleLibrary {
 
         static Rule getRule(ChessPiece piece) {
             PieceType type = piece.getPieceType();
-            return rules(type);
+            return rules(type, piece.pieceColor);
         }
 
-        private static Rule rules(PieceType type) {
+        private static Rule rules(PieceType type, ChessGame.TeamColor color ) {
 
             return switch (type) {
                 case BISHOP -> new Rule(false, Arrays.asList(
@@ -141,9 +135,13 @@ public class ChessPiece {
                         new ChessPosition(-2, 1),
                         new ChessPosition(-2, -1),
                         new ChessPosition(-1, -2)));
-                case PAWN -> new Rule(true, Arrays.asList(
+                case PAWN -> switch(color){
+                    case WHITE -> new Rule(true, Arrays.asList(
                         new ChessPosition(1, 0)
                         ));
+                    case BLACK -> new Rule(true, Arrays.asList(
+                            new ChessPosition(-1, 0)
+                    ));};
                 default -> null;
             };
         }
