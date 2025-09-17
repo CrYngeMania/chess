@@ -61,7 +61,7 @@ public class ChessPiece {
             this.moveOnce = moveOnce;
 
         }
-        static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition){
+        static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition, ChessBoard board){
             Rule typerule = RuleLibrary.getRule(piece);
             HashSet<ChessMove> moves = new HashSet<>();
 
@@ -69,17 +69,27 @@ public class ChessPiece {
                 ChessPosition newPos = myPosition;
                 boolean keepChecking=true;
                 while (keepChecking) {
-
                     ChessPosition nextPos = ChessPosition.add(newPos, direction);
                     int newRow = nextPos.getRow();
                     int newCol = nextPos.getColumn();
                     if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+                        ChessPiece checkPiece = board.getPiece(nextPos);
+                        if (checkPiece != null) {
+                            if (checkPiece.getTeamColor() == piece.getTeamColor()) {
+                                keepChecking = false;
+                            } else {
+                                ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                                moves.add(newMove);
+                                keepChecking = false;
+                            }
+                        } else {
+                            ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                            moves.add(newMove);
+                            newPos = nextPos;
+                            if (typerule.moveOnce) {
+                                keepChecking = false;
+                            }
 
-                        ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                        moves.add(newMove);
-                        newPos = nextPos;
-                        if (typerule.moveOnce){
-                            keepChecking=false;
                         }
                     }
                     else{keepChecking=false;}
@@ -151,7 +161,7 @@ public class ChessPiece {
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
             Collection<ChessMove> moves;
             ChessPiece piece = board.getPiece(myPosition);
-            moves = Rule.movesFromPiece(piece, myPosition);
+            moves = Rule.movesFromPiece(piece, myPosition, board);
 
             /**
              * Implement Bishop and Rook first
