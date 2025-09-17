@@ -64,16 +64,22 @@ public class ChessPiece {
         static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition){
             Rule typerule = RuleLibrary.getRule(piece);
             HashSet<ChessMove> moves = new HashSet<>();
-            for (ChessPosition direction : typerule.directions){
 
-                ChessPosition nextPos = ChessPosition.add(myPosition, direction);
-                int newRow = nextPos.getRow();
-                int newCol = nextPos.getColumn();
-                if (0 < newRow && newRow < 8){
-                    if (0 < newCol && newCol < 8){
+            for (ChessPosition direction : typerule.directions){
+                ChessPosition newPos = myPosition;
+                typerule.moveOnce=false;
+                while (!typerule.moveOnce) {
+
+                    ChessPosition nextPos = ChessPosition.add(newPos, direction);
+                    int newRow = nextPos.getRow();
+                    int newCol = nextPos.getColumn();
+                    if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
                         ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                         moves.add(newMove);
+                        newPos = nextPos;
+
                     }
+                    else{typerule.moveOnce=true;}
                 }
 
                 }
