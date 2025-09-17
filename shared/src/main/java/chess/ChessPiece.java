@@ -67,8 +67,8 @@ public class ChessPiece {
 
             for (ChessPosition direction : typerule.directions){
                 ChessPosition newPos = myPosition;
-                typerule.moveOnce=false;
-                while (!typerule.moveOnce) {
+                boolean keepChecking=true;
+                while (keepChecking) {
 
                     ChessPosition nextPos = ChessPosition.add(newPos, direction);
                     int newRow = nextPos.getRow();
@@ -77,9 +77,11 @@ public class ChessPiece {
                         ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                         moves.add(newMove);
                         newPos = nextPos;
-
+                        if (typerule.moveOnce){
+                            keepChecking=false;
+                        }
                     }
-                    else{typerule.moveOnce=true;}
+                    else{keepChecking=false;}
                 }
 
                 }
@@ -140,8 +142,8 @@ public class ChessPiece {
                         new ChessPosition(-2, -1),
                         new ChessPosition(-1, -2)));
                 case PAWN -> new Rule(true, Arrays.asList(
-                        new ChessPosition(0, 1),
-                        new ChessPosition(0, 2)));
+                        new ChessPosition(1, 0)
+                        ));
                 default -> null;
             };
         }
