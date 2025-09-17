@@ -12,11 +12,12 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
+    private boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-        boolean hasMoved = false;
+        this.hasMoved = false;
     }
 
     /**
@@ -65,6 +66,7 @@ public class ChessPiece {
             Rule typerule = RuleLibrary.getRule(piece);
             HashSet<ChessMove> moves = new HashSet<>();
 
+
             for (ChessPosition direction : typerule.directions){
                 ChessPosition newPos = myPosition;
                 boolean keepChecking=true;
@@ -102,10 +104,10 @@ public class ChessPiece {
 
         static Rule getRule(ChessPiece piece) {
             PieceType type = piece.getPieceType();
-            return rules(type, piece.pieceColor);
+            return rules(type, piece.pieceColor, piece.hasMoved);
         }
 
-        private static Rule rules(PieceType type, ChessGame.TeamColor color ) {
+        private static Rule rules(PieceType type, ChessGame.TeamColor color, boolean hasMoved) {
 
             return switch (type) {
                 case BISHOP -> new Rule(false, Arrays.asList(
@@ -145,13 +147,26 @@ public class ChessPiece {
                         new ChessPosition(-2, 1),
                         new ChessPosition(-2, -1),
                         new ChessPosition(-1, -2)));
-                case PAWN -> switch(color){
-                    case WHITE -> new Rule(true, Arrays.asList(
-                        new ChessPosition(1, 0)
+                case PAWN -> switch(color) {
+                    case WHITE -> switch (hasMoved) {
+                        case true -> new Rule(true, Arrays.asList(
+                                new ChessPosition(1, 0)
                         ));
-                    case BLACK -> new Rule(true, Arrays.asList(
-                            new ChessPosition(-1, 0)
-                    ));};
+                        case false -> new Rule(true, Arrays.asList(
+                                new ChessPosition(1, 0),
+                                new ChessPosition(2, 0)
+                        ));
+                    };
+                    case BLACK -> switch (hasMoved) {
+                        case true -> new Rule(true, Arrays.asList(
+                                new ChessPosition(-1, 0)
+                        ));
+                        case false -> new Rule(true, Arrays.asList(
+                                new ChessPosition(-1, 0),
+                                new ChessPosition(-2, 0)
+                        ));
+                    };
+                };
                 default -> null;
             };
         }
@@ -161,15 +176,16 @@ public class ChessPiece {
         public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
             Collection<ChessMove> moves;
             ChessPiece piece = board.getPiece(myPosition);
+            if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.WHITE && myPosition.getRow()!=2){
+                hasMoved = true;
+            }
+            if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.BLACK && myPosition.getRow()!=7){
+                hasMoved = true;
+            }
             moves = Rule.movesFromPiece(piece, myPosition, board);
 
             /**
-             * Implement Bishop and Rook first
-             * Queen can use both Bishop and Rook (thats pretty much it for Queen)
-             * Knight
-             * King
              * Pawn (pawn is hardest)
-             * implement in ChessPosition?
              * i am losing my mind here I feel like this shouldn't be so hard for me :(
              */
 
