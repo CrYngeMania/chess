@@ -62,43 +62,112 @@ public class ChessPiece {
             this.moveOnce = moveOnce;
 
         }
-        static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition, ChessBoard board){
+        static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition, ChessBoard board) {
             Rule typerule = RuleLibrary.getRule(piece);
             HashSet<ChessMove> moves = new HashSet<>();
 
+            if (piece.getPieceType() != PieceType.PAWN) {
+                for (ChessPosition direction : typerule.directions) {
+                    ChessPosition newPos = myPosition;
+                    boolean keepChecking = true;
+                    while (keepChecking) {
 
-            for (ChessPosition direction : typerule.directions){
-                ChessPosition newPos = myPosition;
-                boolean keepChecking=true;
-                while (keepChecking) {
-                    ChessPosition nextPos = ChessPosition.add(newPos, direction);
-                    int newRow = nextPos.getRow();
-                    int newCol = nextPos.getColumn();
-                    if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
-                        ChessPiece checkPiece = board.getPiece(nextPos);
-                        if (checkPiece != null) {
-                            if (checkPiece.getTeamColor() == piece.getTeamColor()) {
-                                keepChecking = false;
+                        ChessPosition nextPos = ChessPosition.add(newPos, direction);
+
+                        int newRow = nextPos.getRow();
+                        int newCol = nextPos.getColumn();
+
+                        if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+
+                            ChessPiece checkPiece = board.getPiece(nextPos);
+
+                            if (checkPiece != null) {
+
+                                if (checkPiece.getTeamColor() == piece.getTeamColor()) {
+
+                                    keepChecking = false;
+
+                                } else {
+
+                                    ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                                    moves.add(newMove);
+                                    keepChecking = false;
+
+                                }
                             } else {
                                 ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                 moves.add(newMove);
-                                keepChecking = false;
-                            }
-                        } else {
-                            ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                            moves.add(newMove);
-                            newPos = nextPos;
-                            if (typerule.moveOnce) {
-                                keepChecking = false;
+                                newPos = nextPos;
                             }
 
+
+                        } else {
+                            keepChecking = false;
                         }
                     }
-                    else{keepChecking=false;}
                 }
-                }
-            return moves;
             }
+            else{
+                boolean blocked = false;
+                for (ChessPosition direction : typerule.directions) {
+
+
+                    ChessPosition nextPos = ChessPosition.add(myPosition, direction);
+
+                    int newRow = nextPos.getRow();
+                    int newCol = nextPos.getColumn();
+
+                    if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+
+                        ChessPiece checkPiece = board.getPiece(nextPos);
+
+                        if (checkPiece != null) {
+
+                            if (direction.getColumn() != 0){
+                                if (checkPiece.getTeamColor() != piece.getTeamColor()){
+                                    if (newRow == 8 || newRow == 1){
+                                        ChessMove BMove = new ChessMove(myPosition, nextPos, PieceType.BISHOP);
+                                        moves.add(BMove);
+                                        ChessMove RMove = new ChessMove(myPosition, nextPos, PieceType.ROOK);
+                                        moves.add(RMove);
+                                        ChessMove KMove = new ChessMove(myPosition, nextPos, PieceType.KNIGHT);
+                                        moves.add(KMove);
+                                        ChessMove QMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
+                                        moves.add(QMove);}
+                                    else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                                    moves.add(newMove);}
+                                }
+
+                            }
+                            else {blocked = true;}
+                        } else {
+                            if (!blocked && direction.getColumn()== 0) {
+                                if (newRow == 8 || newRow == 1){
+                                    ChessMove BMove = new ChessMove(myPosition, nextPos, PieceType.BISHOP);
+                                    moves.add(BMove);
+                                    ChessMove RMove = new ChessMove(myPosition, nextPos, PieceType.ROOK);
+                                    moves.add(RMove);
+                                    ChessMove KMove = new ChessMove(myPosition, nextPos, PieceType.KNIGHT);
+                                    moves.add(KMove);
+                                    ChessMove QMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
+                                    moves.add(QMove);
+
+                                }
+                                else{
+                                ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                                moves.add(newMove);}
+
+                            }
+                        }
+
+
+                    }
+                }
+
+            }
+                return moves;
+            }
+
     };
     private static class RuleLibrary {
 
@@ -150,20 +219,28 @@ public class ChessPiece {
                 case PAWN -> switch(color) {
                     case WHITE -> switch (hasMoved) {
                         case true -> new Rule(true, Arrays.asList(
-                                new ChessPosition(1, 0)
+                                new ChessPosition(1, 0),
+                                new ChessPosition(1, 1),
+                                new ChessPosition(1, -1)
                         ));
                         case false -> new Rule(true, Arrays.asList(
                                 new ChessPosition(1, 0),
-                                new ChessPosition(2, 0)
+                                new ChessPosition(2, 0),
+                                new ChessPosition(1, 1),
+                                new ChessPosition(1, -1)
                         ));
                     };
                     case BLACK -> switch (hasMoved) {
                         case true -> new Rule(true, Arrays.asList(
-                                new ChessPosition(-1, 0)
+                                new ChessPosition(-1, 0),
+                                new ChessPosition(-1, 1),
+                                new ChessPosition(-1, -1)
                         ));
                         case false -> new Rule(true, Arrays.asList(
                                 new ChessPosition(-1, 0),
-                                new ChessPosition(-2, 0)
+                                new ChessPosition(-2, 0),
+                                new ChessPosition(-1, 1),
+                                new ChessPosition(-1, -1)
                         ));
                     };
                 };
@@ -193,6 +270,13 @@ public class ChessPiece {
             return moves;
         }
 
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "pieceColor=" + pieceColor +
+                ", type=" + type +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {
