@@ -87,12 +87,16 @@ public class ChessPiece {
                                     ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                     moves.add(newMove);
 
+
                                 }
                                 keepChecking = false;
                             } else {
                                 ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                 moves.add(newMove);
                                 newPos = nextPos;
+                                if(typerule.moveOnce){
+                                    keepChecking = false;
+                                }
                             }
 
 
