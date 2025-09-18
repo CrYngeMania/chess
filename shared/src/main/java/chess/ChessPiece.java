@@ -50,8 +50,7 @@ public class ChessPiece {
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
      * danger
-     *
-     * @return Collection of valid moves
+     * return Collection of valid moves
      */
 
     private static class Rule{
@@ -83,17 +82,13 @@ public class ChessPiece {
 
                             if (checkPiece != null) {
 
-                                if (checkPiece.getTeamColor() == piece.getTeamColor()) {
-
-                                    keepChecking = false;
-
-                                } else {
+                                if (checkPiece.getTeamColor() != piece.getTeamColor()) {
 
                                     ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                     moves.add(newMove);
-                                    keepChecking = false;
 
                                 }
+                                keepChecking = false;
                             } else {
                                 ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                 moves.add(newMove);
@@ -168,7 +163,7 @@ public class ChessPiece {
                 return moves;
             }
 
-    };
+    }
     private static class RuleLibrary {
 
         static Rule getRule(ChessPiece piece) {
@@ -217,34 +212,40 @@ public class ChessPiece {
                         new ChessPosition(-2, -1),
                         new ChessPosition(-1, -2)));
                 case PAWN -> switch(color) {
-                    case WHITE -> switch (hasMoved) {
-                        case true -> new Rule(true, Arrays.asList(
-                                new ChessPosition(1, 0),
-                                new ChessPosition(1, 1),
-                                new ChessPosition(1, -1)
-                        ));
-                        case false -> new Rule(true, Arrays.asList(
-                                new ChessPosition(1, 0),
-                                new ChessPosition(2, 0),
-                                new ChessPosition(1, 1),
-                                new ChessPosition(1, -1)
-                        ));
-                    };
-                    case BLACK -> switch (hasMoved) {
-                        case true -> new Rule(true, Arrays.asList(
-                                new ChessPosition(-1, 0),
-                                new ChessPosition(-1, 1),
-                                new ChessPosition(-1, -1)
-                        ));
-                        case false -> new Rule(true, Arrays.asList(
-                                new ChessPosition(-1, 0),
-                                new ChessPosition(-2, 0),
-                                new ChessPosition(-1, 1),
-                                new ChessPosition(-1, -1)
-                        ));
-                    };
+                    case WHITE -> {
+                        if (hasMoved) {
+                            yield new Rule(true, Arrays.asList(
+                                    new ChessPosition(1, 0),
+                                    new ChessPosition(1, 1),
+                                    new ChessPosition(1, -1)
+                            ));
+                        } else {
+                            yield new Rule(true, Arrays.asList(
+                                    new ChessPosition(1, 0),
+                                    new ChessPosition(2, 0),
+                                    new ChessPosition(1, 1),
+                                    new ChessPosition(1, -1)
+                            ));
+                        }
+                    }
+                    case BLACK -> {
+                        if (hasMoved) {
+                            yield new Rule(true, Arrays.asList(
+                                    new ChessPosition(-1, 0),
+                                    new ChessPosition(-1, 1),
+                                    new ChessPosition(-1, -1)
+                            ));
+                        } else {
+                            yield new Rule(true, Arrays.asList(
+                                    new ChessPosition(-1, 0),
+                                    new ChessPosition(-2, 0),
+                                    new ChessPosition(-1, 1),
+                                    new ChessPosition(-1, -1)
+                            ));
+                        }
+                    }
                 };
-                default -> null;
+
             };
         }
         }
@@ -260,11 +261,6 @@ public class ChessPiece {
                 hasMoved = true;
             }
             moves = Rule.movesFromPiece(piece, myPosition, board);
-
-            /**
-             * Pawn (pawn is hardest)
-             * i am losing my mind here I feel like this shouldn't be so hard for me :(
-             */
 
 
             return moves;
