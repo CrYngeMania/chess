@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -48,7 +49,8 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+    public Collection<ChessMove> validMoves(ChessPosition startPosition) throws InvalidMoveException {
+        HashSet<ChessMove> valid = new HashSet<>();
         ChessBoard board = getBoard();
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null){
@@ -59,9 +61,17 @@ public class ChessGame {
 
         Collection<ChessMove> allPossible = piece.pieceMoves(board, startPosition);
         for(ChessMove move: allPossible){
-            ChessBoard copyBoard = gameboard;
+            ChessBoard original = gameboard;
+            ChessBoard copyBoard = original.copy();
+            makeMove(move);
+            gameboard = copyBoard;
+            if(!isInCheck(color)){
+                valid.add(move);
+            }
+            gameboard = original;
 
         }
+        return valid;
 
     }
 

@@ -102,6 +102,23 @@ public class ChessBoard {
 
     }
 
+    public ChessBoard copy(){
+        ChessBoard copyBoard = new ChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPosition pos = new ChessPosition(i,j);
+                ChessPiece piece = getPiece(pos);
+
+                if (piece != null){
+                    ChessPiece copyPiece = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+                    copyBoard.addPiece(pos, copyPiece);
+                }
+            }
+        }
+        return copyBoard;
+
+    }
+
     @Override
     public String toString() {
         return "ChessBoard{" +
