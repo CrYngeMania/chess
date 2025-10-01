@@ -54,7 +54,15 @@ public class ChessGame {
         if (piece == null){
             return null;
         }
+        TeamColor color = piece.getTeamColor();
+        ChessPosition teamKing = gameboard.getKing(color);
+
         Collection<ChessMove> allPossible = piece.pieceMoves(board, startPosition);
+        for(ChessMove move: allPossible){
+            ChessBoard copyBoard = gameboard;
+
+        }
+
     }
 
     /**
@@ -64,7 +72,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-
+        ChessPiece piece = gameboard.getPiece(move.getStartPosition());
+        int newRow = move.getEndPosition().getRow();
+        int newCol = move.getEndPosition().getColumn();
+        ChessPosition newPos = new ChessPosition(newRow, newCol);
+        gameboard.addPiece(newPos, piece);
+        gameboard.addPiece(move.getStartPosition(), null);
     }
 
     /**
