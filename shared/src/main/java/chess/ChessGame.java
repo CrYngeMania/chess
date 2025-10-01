@@ -49,7 +49,7 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) throws InvalidMoveException {
+    public Collection<ChessMove> validMoves(ChessPosition startPosition){
         HashSet<ChessMove> valid = new HashSet<>();
         ChessBoard board = getBoard();
         ChessPiece piece = board.getPiece(startPosition);
@@ -62,14 +62,20 @@ public class ChessGame {
         Collection<ChessMove> allPossible = piece.pieceMoves(board, startPosition);
         for(ChessMove move: allPossible){
             ChessBoard original = gameboard;
-            ChessBoard copyBoard = original.copy();
-            makeMove(move);
-            gameboard = copyBoard;
-            if(!isInCheck(color)){
-                valid.add(move);
-            }
-            gameboard = original;
+            try {
+                gameboard = original.copy();
 
+                makeMove(move);
+                if (!isInCheck(color)) {
+                    valid.add(move);
+                }
+            }
+            catch(InvalidMoveException e){
+
+            }
+            finally {
+                gameboard = original;
+            }
         }
         return valid;
 
@@ -108,19 +114,14 @@ public class ChessGame {
             ChessPiece piece = gameboard.getPiece(position);
             Collection<ChessMove> allPossible = piece.pieceMoves(gameboard, position);
             for (ChessMove move : allPossible) {
-                if (move.getEndPosition() == checkKing) {
+                int newRow = move.getEndPosition().getRow();
+                int newCol = move.getEndPosition().getColumn();
+                if (newRow == checkKing.getRow() && newCol == checkKing.getColumn()) {
                     return true;
                 }
             }
         }
     return false;
-
-        /**
-         * how do i know when a king is in check?
-         * there is a piece(s) attacking it
-         * how do I know if a piece is attacking?
-         * check every enemy piece and see if the king's current position is in their possible moves list
-         */
     }
 
     /**
@@ -129,8 +130,24 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+    public boolean isInCheckmate(TeamColor teamColor){
+        if (isInCheck(teamColor)){
+            Collection<ChessPosition> checkPieces;
+            if (teamColor == TeamColor.WHITE) {
+                checkPieces = getBoard().getTeamPieces(TeamColor.WHITE);
+            } else {
+                checkPieces = getBoard().getTeamPieces(TeamColor.BLACK);
+            }
+            for (ChessPosition position : checkPieces) {
+
+                    Collection<ChessMove> valid = validMoves(position);
+                    if (!valid.isEmpty()) {
+                        return false;
+                    }
+            }
+           return true;
+        }
+        return false;
     }
 
     /**

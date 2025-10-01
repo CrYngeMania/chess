@@ -29,11 +29,14 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (board[i][j] != null){
-                    ChessPosition check = new ChessPosition(i,j);
+                    ChessPosition check = new ChessPosition(i+1,j+1);
                     ChessPiece piece = getPiece(check);
-                    if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color){
-                        return check;
+                    if (piece != null){
+                        if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color){
+                            return check;
+                        }
                     }
+
                 }
             }
         }
@@ -45,7 +48,7 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (board[i][j] != null){
-                    ChessPosition check = new ChessPosition(i,j);
+                    ChessPosition check = new ChessPosition(i+1,j+1);
                     ChessPiece piece = getPiece(check);
                     if (piece.getTeamColor() == color){
                         teamList.add(check);
@@ -106,7 +109,7 @@ public class ChessBoard {
         ChessBoard copyBoard = new ChessBoard();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                ChessPosition pos = new ChessPosition(i,j);
+                ChessPosition pos = new ChessPosition(i+1,j+1);
                 ChessPiece piece = getPiece(pos);
 
                 if (piece != null){
