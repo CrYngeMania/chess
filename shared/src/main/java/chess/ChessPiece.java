@@ -88,6 +88,7 @@ public class ChessPiece {
                                     moves.add(newMove);
 
 
+
                                 }
                                 keepChecking = false;
                             } else {

@@ -1,6 +1,9 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -9,16 +12,16 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
-
+    private ChessBoard gameboard = new ChessBoard();
+    private TeamColor teamTurn;
     public ChessGame() {
-
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return teamTurn;
     }
 
     /**
@@ -27,7 +30,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        teamTurn = team;
     }
 
     /**
@@ -46,7 +49,12 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessBoard board = getBoard();
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null){
+            return null;
+        }
+        Collection<ChessMove> allPossible = piece.pieceMoves(board, startPosition);
     }
 
     /**
@@ -56,7 +64,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+
     }
 
     /**
@@ -66,7 +74,30 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition checkKing = gameboard.getKing(teamColor);
+        Collection<ChessPosition> otherPieces;
+        if (teamColor == TeamColor.WHITE) {
+            otherPieces = getBoard().getTeamPieces(TeamColor.BLACK);
+        } else {
+            otherPieces = getBoard().getTeamPieces(TeamColor.WHITE);
+        }
+        for (ChessPosition position : otherPieces) {
+            ChessPiece piece = gameboard.getPiece(position);
+            Collection<ChessMove> allPossible = piece.pieceMoves(gameboard, position);
+            for (ChessMove move : allPossible) {
+                if (move.getEndPosition() == checkKing) {
+                    return true;
+                }
+            }
+        }
+    return false;
+
+        /**
+         * how do i know when a king is in check?
+         * there is a piece(s) attacking it
+         * how do I know if a piece is attacking?
+         * check every enemy piece and see if the king's current position is in their possible moves list
+         */
     }
 
     /**
@@ -96,7 +127,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        gameboard = board;
     }
 
     /**
@@ -105,6 +136,28 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return gameboard;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "gameboard=" + gameboard +
+                ", teamTurn=" + teamTurn +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(gameboard, chessGame.gameboard) && teamTurn == chessGame.teamTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameboard, teamTurn);
     }
 }
