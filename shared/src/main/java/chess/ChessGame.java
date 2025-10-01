@@ -15,9 +15,11 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard gameboard = new ChessBoard();
     private TeamColor teamTurn;
+    public static ChessMove lastMove;
     public ChessGame() {
         gameboard.resetBoard();
         teamTurn = TeamColor.WHITE;
+        this.lastMove = lastMove;
     }
 
     /**
@@ -96,6 +98,8 @@ public class ChessGame {
         ChessPosition newPos = new ChessPosition(newRow, newCol);
         gameboard.addPiece(newPos, piece);
         gameboard.addPiece(move.getStartPosition(), null);
+
+        lastMove = move;
     }
 
     /**

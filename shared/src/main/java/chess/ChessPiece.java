@@ -2,6 +2,8 @@ package chess;
 
 import java.util.*;
 
+import static chess.ChessGame.lastMove;
+
 /**
  * Represents a single chess piece
  * <p>
@@ -109,6 +111,28 @@ public class ChessPiece {
             }
             else{
                 boolean blocked = false;
+
+                if (lastMove != null){
+                    ChessPiece lastPiece = board.getPiece(lastMove.getEndPosition());
+                    if (lastPiece.getPieceType() == PieceType.PAWN){
+                        int startRow = lastMove.getStartPosition().getRow();
+                        int endRow = lastMove.getEndPosition().getRow();
+                        if (startRow - endRow == 2 || startRow - endRow == -2){
+                            ChessPosition checkRight = new ChessPosition(myPosition.getRow(), myPosition.getColumn()+1);
+                            ChessPosition checkLeft = new ChessPosition(myPosition.getRow(), myPosition.getColumn()-1);
+                            if (checkRight.equals(lastMove.getEndPosition())){
+                                ChessPosition EPPos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
+                                ChessMove EPRight = new ChessMove(myPosition, EPPos, null);
+                                moves.add(EPRight);
+                            }
+                            if (checkLeft.equals(lastMove.getEndPosition())){
+                                ChessPosition EPPos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
+                                ChessMove EPLeft = new ChessMove(myPosition, EPPos, null);
+                                moves.add(EPLeft);
+                            }
+                        }
+                    }
+                }
                 for (ChessPosition direction : typerule.directions) {
 
 
