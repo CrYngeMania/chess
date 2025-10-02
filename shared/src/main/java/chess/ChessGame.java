@@ -147,6 +147,14 @@ public class ChessGame {
                 gameboard.addPiece(newPos, piece);
                 gameboard.addPiece(move.getStartPosition(), null);
             }
+            if (lastMove != null) {
+                ChessPiece lastPiece = gameboard.getPiece(lastMove.getEndPosition());
+                if (lastPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                    if (lastMove.getEndPosition().getColumn() == newCol){
+                        gameboard.addPiece(lastMove.getEndPosition(), null);
+                    }
+                }
+            }
 
         }
         else{
@@ -158,6 +166,7 @@ public class ChessGame {
         else if (piece.getTeamColor() == TeamColor.WHITE){
             setTeamTurn(TeamColor.BLACK);
         }
+        lastMove = move;
     }
 
     /**
