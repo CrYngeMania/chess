@@ -2,7 +2,6 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 
@@ -15,11 +14,11 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard gameboard = new ChessBoard();
     private TeamColor teamTurn;
-    public static ChessMove lastMove;
+    private ChessMove lastMove;
     public ChessGame() {
         gameboard.resetBoard();
         teamTurn = TeamColor.WHITE;
-        this.lastMove = lastMove;
+        lastMove = null;
     }
 
     /**
@@ -54,6 +53,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition){
+
         HashSet<ChessMove> valid = new HashSet<>();
         ChessBoard board = getBoard();
         ChessPiece piece = board.getPiece(startPosition);
@@ -66,19 +66,53 @@ public class ChessGame {
         Collection<ChessMove> allPossible = piece.pieceMoves(board, startPosition);
         for(ChessMove move: allPossible){
             ChessBoard original = gameboard;
-            try {
+
                 gameboard = original.copy();
 
-                makeMove(move);
+                gameboard.addPiece(move.getEndPosition(), piece);
+                gameboard.addPiece(startPosition, null);
                 if (!isInCheck(color)) {
                     valid.add(move);
                 }
-            }
-            catch(InvalidMoveException e){
 
-            }
-            finally {
                 gameboard = original;
+
+        }
+
+        if (lastMove != null){
+            ChessPiece lastPiece = board.getPiece(lastMove.getEndPosition());
+            if (lastPiece.getPieceType() == ChessPiece.PieceType.PAWN){
+                int startRow = lastMove.getStartPosition().getRow();
+                int endRow = lastMove.getEndPosition().getRow();
+                if (startRow - endRow == 2 || startRow - endRow == -2){
+                    ChessPosition checkRight = new ChessPosition(startPosition.getRow(), startPosition.getColumn()+1);
+                    ChessPosition checkLeft = new ChessPosition(startPosition.getRow(), startPosition.getColumn()-1);
+                    if (checkRight.equals(lastMove.getEndPosition())){
+                        if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                            ChessPosition EPPos = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
+                            ChessMove EPRight = new ChessMove(startPosition, EPPos, null);
+                            valid.add(EPRight);
+                        }
+                        else{
+                            ChessPosition EPPos = new ChessPosition(startPosition.getRow()-1, startPosition.getColumn()+1);
+                            ChessMove EPRight = new ChessMove(startPosition, EPPos, null);
+                            valid.add(EPRight);
+                        }
+                    }
+                    else if (checkLeft.equals(lastMove.getEndPosition())){
+                        if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                            ChessPosition EPPos = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()-1);
+                            ChessMove EPLeft = new ChessMove(startPosition, EPPos, null);
+                            valid.add(EPLeft);
+                        }
+                        else{
+                            ChessPosition EPPos = new ChessPosition(startPosition.getRow()-1, startPosition.getColumn()-1);
+                            ChessMove EPLeft = new ChessMove(startPosition, EPPos, null);
+                            valid.add(EPLeft);
+                        }
+
+                    }
+                }
             }
         }
         return valid;
@@ -93,13 +127,37 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = gameboard.getPiece(move.getStartPosition());
-        int newRow = move.getEndPosition().getRow();
-        int newCol = move.getEndPosition().getColumn();
-        ChessPosition newPos = new ChessPosition(newRow, newCol);
-        gameboard.addPiece(newPos, piece);
-        gameboard.addPiece(move.getStartPosition(), null);
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at start position.");
+        }
+        if (piece.getTeamColor()!= teamTurn) {
+            throw new InvalidMoveException("It's not your turn bucko >:(");
+        }
+        Collection<ChessMove> valid = validMoves(move.getStartPosition());
+        if (valid.contains(move)) {
+            int newRow = move.getEndPosition().getRow();
+            int newCol = move.getEndPosition().getColumn();
+            ChessPosition newPos = new ChessPosition(newRow, newCol);
+            if (piece.getPieceType() == ChessPiece.PieceType.PAWN && move.getPromotionPiece()!= null){
+                ChessPiece promotion = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+                gameboard.addPiece(newPos, promotion);
+                gameboard.addPiece(move.getStartPosition(), null);
+            }
+            else{
+                gameboard.addPiece(newPos, piece);
+                gameboard.addPiece(move.getStartPosition(), null);
+            }
 
-        lastMove = move;
+        }
+        else{
+            throw new InvalidMoveException("Not a valid move.");
+        }
+        if (piece.getTeamColor() == TeamColor.BLACK){
+            setTeamTurn(TeamColor.WHITE);
+        }
+        else if (piece.getTeamColor() == TeamColor.WHITE){
+            setTeamTurn(TeamColor.BLACK);
+        }
     }
 
     /**
@@ -127,7 +185,7 @@ public class ChessGame {
                 }
             }
         }
-    return false;
+        return false;
     }
 
     /**
@@ -146,12 +204,12 @@ public class ChessGame {
             }
             for (ChessPosition position : checkPieces) {
 
-                    Collection<ChessMove> valid = validMoves(position);
-                    if (!valid.isEmpty()) {
-                        return false;
-                    }
+                Collection<ChessMove> valid = validMoves(position);
+                if (!valid.isEmpty()) {
+                    return false;
+                }
             }
-           return true;
+            return true;
         }
         return false;
     }

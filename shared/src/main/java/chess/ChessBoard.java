@@ -12,7 +12,7 @@ public class ChessBoard {
 
     final private ChessPiece[][] board = new ChessPiece[8][8];
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -125,7 +125,7 @@ public class ChessBoard {
     @Override
     public String toString() {
         return "ChessBoard{" +
-                "board=" + Arrays.toString(board) +
+                "board=" + Arrays.deepToString(board) +
                 '}';
     }
 
@@ -143,4 +143,3 @@ public class ChessBoard {
         return Arrays.deepHashCode(board);
     }
 }
-

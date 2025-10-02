@@ -2,8 +2,6 @@ package chess;
 
 import java.util.*;
 
-import static chess.ChessGame.lastMove;
-
 /**
  * Represents a single chess piece
  * <p>
@@ -111,31 +109,7 @@ public class ChessPiece {
             }
             else{
                 boolean blocked = false;
-
-                if (lastMove != null){
-                    ChessPiece lastPiece = board.getPiece(lastMove.getEndPosition());
-                    if (lastPiece.getPieceType() == PieceType.PAWN){
-                        int startRow = lastMove.getStartPosition().getRow();
-                        int endRow = lastMove.getEndPosition().getRow();
-                        if (startRow - endRow == 2 || startRow - endRow == -2){
-                            ChessPosition checkRight = new ChessPosition(myPosition.getRow(), myPosition.getColumn()+1);
-                            ChessPosition checkLeft = new ChessPosition(myPosition.getRow(), myPosition.getColumn()-1);
-                            if (checkRight.equals(lastMove.getEndPosition())){
-                                ChessPosition EPPos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()+1);
-                                ChessMove EPRight = new ChessMove(myPosition, EPPos, null);
-                                moves.add(EPRight);
-                            }
-                            if (checkLeft.equals(lastMove.getEndPosition())){
-                                ChessPosition EPPos = new ChessPosition(myPosition.getRow()+1, myPosition.getColumn()-1);
-                                ChessMove EPLeft = new ChessMove(myPosition, EPPos, null);
-                                moves.add(EPLeft);
-                            }
-                        }
-                    }
-                }
                 for (ChessPosition direction : typerule.directions) {
-
-
                     ChessPosition nextPos = ChessPosition.add(myPosition, direction);
 
                     int newRow = nextPos.getRow();
@@ -159,7 +133,7 @@ public class ChessPiece {
                                         ChessMove QMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
                                         moves.add(QMove);}
                                     else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                                    moves.add(newMove);}
+                                        moves.add(newMove);}
                                 }
 
                             }
@@ -178,8 +152,8 @@ public class ChessPiece {
 
                                 }
                                 else{
-                                ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                                moves.add(newMove);}
+                                    ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                                    moves.add(newMove);}
 
                             }
                         }
@@ -189,8 +163,8 @@ public class ChessPiece {
                 }
 
             }
-                return moves;
-            }
+            return moves;
+        }
 
     }
     private static class RuleLibrary {
@@ -277,23 +251,23 @@ public class ChessPiece {
 
             };
         }
+    }
+
+
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves;
+        ChessPiece piece = board.getPiece(myPosition);
+        if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.WHITE && myPosition.getRow()!=2){
+            hasMoved = true;
         }
-
-
-        public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-            Collection<ChessMove> moves;
-            ChessPiece piece = board.getPiece(myPosition);
-            if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.WHITE && myPosition.getRow()!=2){
-                hasMoved = true;
-            }
-            if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.BLACK && myPosition.getRow()!=7){
-                hasMoved = true;
-            }
-            moves = Rule.movesFromPiece(piece, myPosition, board);
-
-
-            return moves;
+        if(piece.getPieceType() == PieceType.PAWN && piece.pieceColor== ChessGame.TeamColor.BLACK && myPosition.getRow()!=7){
+            hasMoved = true;
         }
+        moves = Rule.movesFromPiece(piece, myPosition, board);
+
+
+        return moves;
+    }
 
     @Override
     public String toString() {
@@ -319,4 +293,3 @@ public class ChessPiece {
 
 
 }
-
