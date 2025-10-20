@@ -28,6 +28,8 @@ public class Server {
 
         server.post("user", this::register);
 
+        server.post("session", this::login);
+
         // Register your endpoints and exception handlers here.
 
     }
@@ -42,6 +44,30 @@ public class Server {
             var req = serialiser.fromJson(ctx.body(), UserData.class);
             var res = serialiser.toJson(req);
             var response = userService.register(req);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+
+        }
+
+    }
+
+    private void login(Context ctx){
+        var serialiser = new Gson();
+        try {
+            var req = serialiser.fromJson(ctx.body(), UserData.class);
+            var res = serialiser.toJson(req);
+            var response = userService.login(req);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
