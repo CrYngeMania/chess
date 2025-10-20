@@ -1,7 +1,9 @@
 package service;
 
 
+import dataModel.CreateGameResult;
 import dataModel.LoginResult;
+import dataModel.LogoutResult;
 import dataModel.RegistrationResult;
 import dataaccess.DataAccessException;
 import model.AuthData;
@@ -20,7 +22,7 @@ public class UserService {
 
 
 
-    public RegistrationResult register(UserData user) throws DataAccessException{
+    public AuthData register(UserData user) throws DataAccessException{
         if (dataAccess.getUser(user.username()) != null){
             throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
             /** username taken **/
@@ -29,7 +31,12 @@ public class UserService {
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
         }
         dataAccess.saveUser(user);
-        return new RegistrationResult(user.username(), generateToken());
+
+        AuthData reg = new AuthData(user.username(), generateToken());
+        dataAccess.saveAuth(reg);
+
+        dataAccess.setCurrAuth(reg);
+        return reg;
 
     }
 
@@ -46,6 +53,28 @@ public class UserService {
             throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Username/password is invalid");
         }
         dataAccess.saveUser(user);
+
+        AuthData reg = new AuthData(user.username(), generateToken());
+        dataAccess.saveAuth(reg);
+        dataAccess.setCurrAuth(reg);
+
         return new LoginResult(user.username(), generateToken());
+    }
+
+    public LogoutResult logout() throws DataAccessException{
+        AuthData currAuth = dataAccess.getCurrAuth();
+        if (currAuth == null){
+            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
+        }
+        if (dataAccess.getAuth(currAuth.authToken()) == null) {
+            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
+        }
+        dataAccess.deleteAuth(currAuth);
+
+        return new LogoutResult();
+    }
+
+    public CreateGameResult createGame(String gameName){
+
     }
 }
