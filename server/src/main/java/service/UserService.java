@@ -2,29 +2,33 @@ package service;
 
 
 import dataModel.RegistrationResult;
+import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import dataaccess.DataAccess;
-import java.util.UUID;
 
+import static server.Server.generateToken;
 
 
 public class UserService {
-    private DataAccess dataAccess;
+    private final DataAccess dataAccess;
 
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
 
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
 
-    public AuthData register(UserData user) throws Exception{
+
+    public RegistrationResult register(UserData user) throws DataAccessException{
         if (dataAccess.getUser(user.username()) != null){
-            throw new Exception("username taken error") ;
+            throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
+            /** username taken **/
         }
-        return new AuthData(user.username(), generateToken());
+        if (user.password() == null){
+            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
+        }
+        dataAccess.saveUser(user);
+        return new RegistrationResult(user.username(), generateToken());
 
     }
 }

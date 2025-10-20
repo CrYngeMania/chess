@@ -1,9 +1,10 @@
-package dataaccess;
 
-/**
- * Indicates there was an error connecting to the database
- */
-public class DataAccessException extends Exception{
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ResponseException extends Exception {
 
     public enum Code {
         ServerError,
@@ -11,17 +12,23 @@ public class DataAccessException extends Exception{
         TakenError,
         UnauthorisedError,
     }
+
     final private Code code;
 
-    public DataAccessException(Code code, String message) {
+    public ResponseException(Code code, String message) {
         super(message);
         this.code = code;
-
     }
 
-    public DataAccessException(Code code, String message, Throwable ex) {
-        super(message, ex);
-        this.code = code;
+    public String toJson() {
+        return new Gson().toJson(Map.of("message", getMessage(), "status", code));
+    }
+
+    public static ResponseException fromJson(String json) {
+        var map = new Gson().fromJson(json, HashMap.class);
+        var status = Code.valueOf(map.get("status").toString());
+        String message = map.get("message").toString();
+        return new ResponseException(status, message);
     }
 
     public Code code() {
@@ -46,5 +53,4 @@ public class DataAccessException extends Exception{
             case UnauthorisedError -> 401;
         };
     }
-
 }

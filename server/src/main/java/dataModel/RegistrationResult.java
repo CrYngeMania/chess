@@ -1,4 +1,4 @@
 package dataModel;
 
-public record RegistrationResult() {
+public record RegistrationResult(String username, String authToken) {
 }

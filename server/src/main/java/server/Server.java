@@ -1,12 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import model.UserData;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
+import java.util.UUID;
 
 
 public class Server {
@@ -20,7 +22,6 @@ public class Server {
         dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
 
-
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         server.delete("db", ctx -> ctx.result("{}"));
@@ -31,13 +32,31 @@ public class Server {
 
     }
 
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
+    }
+
     private void register(Context ctx){
         var serialiser = new Gson();
-        var req = serialiser.fromJson(ctx.body(), UserData.class);
-        var res = serialiser.toJson(req);
+        try {
+            var req = serialiser.fromJson(ctx.body(), UserData.class);
+            var res = serialiser.toJson(req);
+            var response = userService.register(req);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
 
-        var response = userService.register(req);
-        ctx.result(serialiser.toJson(response));
+        }
 
     }
 
@@ -50,3 +69,5 @@ public class Server {
         server.stop();
     }
 }
+
+record ErrorResponse(String message) {}
