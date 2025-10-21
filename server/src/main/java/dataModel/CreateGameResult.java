@@ -1,4 +1,4 @@
 package dataModel;
 
-public record CreateGameResult(String gameID) {
+public record CreateGameResult(Integer gameID) {
 }

@@ -1,14 +1,16 @@
 package service;
 
 
-import dataModel.CreateGameResult;
-import dataModel.LoginResult;
-import dataModel.LogoutResult;
-import dataModel.RegistrationResult;
+import chess.ChessGame;
+import dataModel.*;
 import dataaccess.DataAccessException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import dataaccess.DataAccess;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 import static server.Server.generateToken;
 
@@ -61,20 +63,56 @@ public class UserService {
         return new LoginResult(user.username(), generateToken());
     }
 
-    public LogoutResult logout() throws DataAccessException{
+    public void checkAuth(AuthData auth) throws DataAccessException{
+        if (auth == null){
+            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
+        }
+        if (dataAccess.getAuth(auth.authToken()) == null) {
+            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
+        }
+    }
+
+    public LogoutResult logout() throws DataAccessException {
         AuthData currAuth = dataAccess.getCurrAuth();
-        if (currAuth == null){
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
-        if (dataAccess.getAuth(currAuth.authToken()) == null) {
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
+        checkAuth(currAuth);
         dataAccess.deleteAuth(currAuth);
 
         return new LogoutResult();
     }
 
-    public CreateGameResult createGame(String gameName){
+    public Integer generateID() {
+        while(true) {
+            Random random = new Random();
+            int bound = 1000000;
+            int randomInt = random.nextInt(bound);
+            if (dataAccess.getGame(randomInt) == null) {
+                return randomInt;
+            }
+        }
+    }
+
+    public CreateGameResult createGame(CreateGameRequest request) throws DataAccessException {
+        AuthData currAuth = dataAccess.getCurrAuth();
+        checkAuth(currAuth);
+        if (request.gameName() == null) {
+            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No game name provided");
+        }
+
+        Integer gameID = generateID();
+        dataAccess.saveGame(new GameData(gameID, null, null, request.gameName(), new ChessGame()));
+        return new CreateGameResult(gameID);
+    }
+
+    public ListGameResult listGame() throws DataAccessException{
+        AuthData currAuth = dataAccess.getCurrAuth();
+        checkAuth(currAuth);
+
+        ArrayList<GameData> gamesList = dataAccess.getGamesList();
+        if (gamesList == null){
+            return new ListGameResult(new ArrayList<>());
+        }
+        return new ListGameResult(gamesList);
 
     }
+
 }

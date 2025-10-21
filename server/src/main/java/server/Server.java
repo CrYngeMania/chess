@@ -1,7 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import dataModel.CreateGameRequest;
 import dataaccess.DataAccessException;
+import model.GameData;
 import model.UserData;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
@@ -31,6 +33,10 @@ public class Server {
         server.post("session", this::login);
 
         server.delete("session", this::logout);
+
+        server.post("game", this::createGame);
+
+        server.get("game", this::listGames);
 
         // Register your endpoints and exception handlers here.
 
@@ -92,6 +98,52 @@ public class Server {
         var serialiser = new Gson();
         try {
             var response = userService.logout();
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+
+        }
+
+    }
+
+    private void createGame(Context ctx){
+        var serialiser = new Gson();
+        try {
+            var req = serialiser.fromJson(ctx.body(), CreateGameRequest.class);
+            var res = serialiser.toJson(req);
+            var response = userService.createGame(req);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+
+        }
+
+    }
+
+    public void listGames(Context ctx){
+        var serialiser = new Gson();
+        try {
+            var response = userService.listGame();
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){

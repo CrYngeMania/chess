@@ -1,14 +1,18 @@
 package dataaccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
 
 public class MemoryDataAccess implements DataAccess {
 
     private HashMap<String, UserData> users = new HashMap<>();
     private HashMap<String, AuthData> auths = new HashMap<>();
+    private HashMap<Integer, GameData> games = new HashMap<>();
     private AuthData currAuth;
 
     @Override
@@ -45,7 +49,22 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData getCurrAuth(){
-        return currAuth;
+    public AuthData getCurrAuth(){return currAuth;
     };
+
+    @Override
+    public void saveGame(GameData game) {
+        games.put(game.gameID(), game);
+    }
+
+    @Override
+    public GameData getGame(Integer gameID){
+        return games.get(gameID);
+    }
+
+    @Override
+    public ArrayList<GameData> getGamesList() {
+        return new ArrayList<>(games.values());
+    }
+
 }
