@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class GameServiceTests {
 
     private static TestUser existingUser;
-    private static TestUser newUser;
     private static TestCreateRequest createRequest;
     private static TestServerFacade serverFacade;
     private static Server server;
@@ -35,7 +34,6 @@ public class GameServiceTests {
 
         serverFacade = new TestServerFacade("localhost", Integer.toString(port));
         existingUser = new TestUser("ExistingUser", "existingUserPassword", "eu@mail.com");
-        newUser = new TestUser("NewUser", "newUserPassword", "nu@mail.com");
         createRequest = new TestCreateRequest("testGame");
     }
 
@@ -51,72 +49,57 @@ public class GameServiceTests {
 
 
     @Test
-    public void register_success() {
-        TestUser[] testers = {
-                newUser,
-                new TestUser("tester", "well hello there", "struggling rn"),
-                new TestUser("goodfarmswithscar", "well hello there", "good"),
-                new TestUser("Cry", "well hello there", "ohboy")
-        };
-        for (TestUser user : testers) {
-            TestAuthResult registerResult = serverFacade.register(user);
-            assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
-        }
+    public void create_game_success() {
+        TestCreateResult createGameResult = serverFacade.createGame(createRequest, existingAuth);
+        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+
     }
 
     @Test
-    public void register_fail_dupe_names(){
-
-        TestUser tester1 = new TestUser("goodfarmswithscar", "well hello there", "struggling rn");
-        TestUser tester1_copy = new TestUser("goodfarmswithscar", "well hello there", "good");
-
-
-        TestAuthResult registerResult = serverFacade.register(tester1);
-        TestAuthResult registerResult2 = serverFacade.register(tester1_copy);
-        assertHttpForbidden(registerResult2);
+    public void create_fail() {
+        TestCreateResult createGameResultNoAuth = serverFacade.createGame(createRequest, null);
+        assertHttpUnauthorized(createGameResultNoAuth);
+        TestCreateResult createGameResult = serverFacade.createGame(new TestCreateRequest(null), existingAuth);
+        assertHttpBadRequest(createGameResult);
     }
 
     @Test
-    public void register_fail_no_name(){
+    public void list_games_success(){
+        TestListResult listGamesResult = serverFacade.listGames(existingAuth);
+        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
-        TestUser tester1 = new TestUser(null, "well hello there", "struggling rn");
+        TestCreateResult createGameResult1 = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
+        TestCreateResult createGameResult = serverFacade.createGame(new TestCreateRequest("Dipple Dop!"), existingAuth);
+        TestCreateResult createGameResult2 = serverFacade.createGame(new TestCreateRequest("In Oli we trust"), existingAuth);
 
-        TestAuthResult registerResult = serverFacade.register(tester1);
-        assertHttpBadRequest(registerResult);
+        TestListResult listGamesResult2 = serverFacade.listGames(existingAuth);
+        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+
     }
 
     @Test
-    public void login_success(){
-        TestAuthResult loginResult = serverFacade.login(existingUser);
+    public void list_games_fail(){
+        TestListResult listGamesResult = serverFacade.listGames(null);
+        assertHttpUnauthorized(listGamesResult);
+    }
+
+    @Test
+    public void join_game_success(){
+        TestCreateResult createGame = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
+        TestResult joinGameResult = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
+        TestResult joinGameResult2 = serverFacade.joinPlayer(new TestJoinRequest("BLACK", createGame.getGameID()), existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
     }
 
     @Test
-    public void login_fail(){
-        TestAuthResult loginResult = serverFacade.login(new TestUser(existingUser.getUsername(), null, existingUser.getEmail()));
-        assertHttpBadRequest(loginResult);
+    public void join_game_fail(){
+        TestCreateResult createGame = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
+        TestResult joinGameResult = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
+        TestResult joinGameResult2 = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
+        assertHttpForbidden(joinGameResult2);
 
-        TestAuthResult loginResultUser = serverFacade.login(new TestUser(null, existingUser.getPassword(), existingUser.getEmail()));
-        assertHttpBadRequest(loginResult);
-
-        TestAuthResult loginResultBadPassword = serverFacade.login(new TestUser(existingUser.getUsername(), "Well hello there", existingUser.getEmail()));
-        assertHttpUnauthorized(loginResult);
-    }
-
-    @Test
-    public void logout_success(){
-        TestResult logoutResult = serverFacade.logout(existingAuth);
-        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
-    }
-
-    @Test
-    public void logout_fail(){
-        TestResult logoutResult = serverFacade.logout(null);
-        assertHttpUnauthorized(logoutResult);
-        TestResult logoutResultFirst = serverFacade.logout(existingAuth);
-        TestResult logoutResultSecond = serverFacade.logout(existingAuth);
-        assertHttpUnauthorized(logoutResultSecond);
-
+        TestResult joinGameResultWrongColor = serverFacade.joinPlayer(new TestJoinRequest("ORANGE", createGame.getGameID()), existingAuth);
+        assertHttpBadRequest(joinGameResultWrongColor);
     }
 
 

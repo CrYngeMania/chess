@@ -16,10 +16,10 @@ public class UserServiceTests {
 
     private static TestUser existingUser;
     private static TestUser newUser;
-    private static TestCreateRequest createRequest;
     private static TestServerFacade serverFacade;
     private static Server server;
     private String existingAuth;
+    private static TestCreateRequest createRequest;
 
 
     @AfterAll
@@ -117,6 +117,16 @@ public class UserServiceTests {
 
     }
 
+    @Test
+    public void clear_pass(){
+        TestResult clearResult = serverFacade.clear();
+        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+
+        TestCreateResult createGameResult = serverFacade.createGame(createRequest, existingAuth);
+        TestCreateResult createGameResult2 = serverFacade.createGame(new TestCreateRequest("Well hello there"), existingAuth);
+        TestResult clearMultiple = serverFacade.clear();
+        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+    }
 
 
 
