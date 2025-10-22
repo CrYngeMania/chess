@@ -49,14 +49,14 @@ public class GameServiceTests {
 
 
     @Test
-    public void create_game_success() {
+    public void createGameSuccess() {
         TestCreateResult createGameResult = serverFacade.createGame(createRequest, existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
     }
 
     @Test
-    public void create_fail() {
+    public void createFail() {
         TestCreateResult createGameResultNoAuth = serverFacade.createGame(createRequest, null);
         assertHttpUnauthorized(createGameResultNoAuth);
         TestCreateResult createGameResult = serverFacade.createGame(new TestCreateRequest(null), existingAuth);
@@ -64,7 +64,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void list_games_success(){
+    public void listGamesSuccess(){
         TestListResult listGamesResult = serverFacade.listGames(existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
@@ -78,13 +78,13 @@ public class GameServiceTests {
     }
 
     @Test
-    public void list_games_fail(){
+    public void listGamesFail(){
         TestListResult listGamesResult = serverFacade.listGames(null);
         assertHttpUnauthorized(listGamesResult);
     }
 
     @Test
-    public void join_game_success(){
+    public void joinGameSuccess(){
         TestCreateResult createGame = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
         TestResult joinGameResult = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
         TestResult joinGameResult2 = serverFacade.joinPlayer(new TestJoinRequest("BLACK", createGame.getGameID()), existingAuth);
@@ -92,7 +92,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void join_game_fail(){
+    public void joinGameFail(){
         TestCreateResult createGame = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
         TestResult joinGameResult = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
         TestResult joinGameResult2 = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);

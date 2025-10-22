@@ -61,6 +61,19 @@ public class ChessPiece {
             this.moveOnce = moveOnce;
 
         }
+        static HashSet<ChessMove> pawnPromotionMoves(ChessPosition myPosition, ChessPosition nextPos, HashSet<ChessMove> moves){
+            ChessMove bMove = new ChessMove(myPosition, nextPos, PieceType.BISHOP);
+            moves.add(bMove);
+            ChessMove rMove = new ChessMove(myPosition, nextPos, PieceType.ROOK);
+            moves.add(rMove);
+            ChessMove kMove = new ChessMove(myPosition, nextPos, PieceType.KNIGHT);
+            moves.add(kMove);
+            ChessMove qMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
+            moves.add(qMove);
+
+            return moves;
+        }
+
         static Collection<ChessMove> movesFromPiece(ChessPiece piece, ChessPosition myPosition, ChessBoard board) {
             Rule typerule = RuleLibrary.getRule(piece);
             HashSet<ChessMove> moves = new HashSet<>();
@@ -124,14 +137,7 @@ public class ChessPiece {
                             if (direction.getColumn() != 0){
                                 if (checkPiece.getTeamColor() != piece.getTeamColor()){
                                     if (newRow == 8 || newRow == 1){
-                                        ChessMove BMove = new ChessMove(myPosition, nextPos, PieceType.BISHOP);
-                                        moves.add(BMove);
-                                        ChessMove RMove = new ChessMove(myPosition, nextPos, PieceType.ROOK);
-                                        moves.add(RMove);
-                                        ChessMove KMove = new ChessMove(myPosition, nextPos, PieceType.KNIGHT);
-                                        moves.add(KMove);
-                                        ChessMove QMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
-                                        moves.add(QMove);}
+                                        moves = pawnPromotionMoves(myPosition, nextPos, moves);}
                                     else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                                         moves.add(newMove);}
                                 }
@@ -141,15 +147,7 @@ public class ChessPiece {
                         } else {
                             if (!blocked && direction.getColumn()== 0) {
                                 if (newRow == 8 || newRow == 1){
-                                    ChessMove BMove = new ChessMove(myPosition, nextPos, PieceType.BISHOP);
-                                    moves.add(BMove);
-                                    ChessMove RMove = new ChessMove(myPosition, nextPos, PieceType.ROOK);
-                                    moves.add(RMove);
-                                    ChessMove KMove = new ChessMove(myPosition, nextPos, PieceType.KNIGHT);
-                                    moves.add(KMove);
-                                    ChessMove QMove = new ChessMove(myPosition, nextPos, PieceType.QUEEN);
-                                    moves.add(QMove);
-
+                                    moves = pawnPromotionMoves(myPosition, nextPos, moves);
                                 }
                                 else{
                                     ChessMove newMove = new ChessMove(myPosition, nextPos, null);

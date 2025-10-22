@@ -49,7 +49,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void register_success() {
+    public void registerSuccess() {
         TestUser[] testers = {
                 newUser,
                 new TestUser("tester", "well hello there", "struggling rn"),
@@ -63,19 +63,19 @@ public class UserServiceTests {
     }
 
     @Test
-    public void register_fail_dupe_names(){
+    public void registerFailDupeNames(){
 
         TestUser tester1 = new TestUser("goodfarmswithscar", "well hello there", "struggling rn");
-        TestUser tester1_copy = new TestUser("goodfarmswithscar", "well hello there", "good");
+        TestUser tester1Copy = new TestUser("goodfarmswithscar", "well hello there", "good");
 
 
         TestAuthResult registerResult = serverFacade.register(tester1);
-        TestAuthResult registerResult2 = serverFacade.register(tester1_copy);
+        TestAuthResult registerResult2 = serverFacade.register(tester1Copy);
         assertHttpForbidden(registerResult2);
     }
 
     @Test
-    public void register_fail_no_name(){
+    public void registerFailNoName(){
 
         TestUser tester1 = new TestUser(null, "well hello there", "struggling rn");
 
@@ -84,13 +84,13 @@ public class UserServiceTests {
     }
 
     @Test
-    public void login_success(){
+    public void loginSuccess(){
         TestAuthResult loginResult = serverFacade.login(existingUser);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
     }
 
     @Test
-    public void login_fail(){
+    public void loginFail(){
         TestAuthResult loginResult = serverFacade.login(new TestUser(existingUser.getUsername(), null, existingUser.getEmail()));
         assertHttpBadRequest(loginResult);
 
@@ -102,13 +102,13 @@ public class UserServiceTests {
     }
 
     @Test
-    public void logout_success(){
+    public void logoutSuccess(){
         TestResult logoutResult = serverFacade.logout(existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
     }
 
     @Test
-    public void logout_fail(){
+    public void logoutFail(){
         TestResult logoutResult = serverFacade.logout(null);
         assertHttpUnauthorized(logoutResult);
         TestResult logoutResultFirst = serverFacade.logout(existingAuth);
@@ -118,7 +118,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void clear_pass(){
+    public void clearPass(){
         TestResult clearResult = serverFacade.clear();
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
