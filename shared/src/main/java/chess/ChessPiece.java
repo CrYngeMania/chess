@@ -83,37 +83,38 @@ public class ChessPiece {
                 int newRow = nextPos.getRow();
                 int newCol = nextPos.getColumn();
 
-                if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+                if (!(0 < newRow && newRow < 9 && 0 < newCol && newCol < 9)) {
+                    continue;
+                }
 
-                    ChessPiece checkPiece = board.getPiece(nextPos);
+                ChessPiece checkPiece = board.getPiece(nextPos);
 
-                    if (checkPiece != null) {
+                if (checkPiece != null) {
 
-                        if (direction.getColumn() != 0 && checkPiece.getTeamColor() != piece.getTeamColor()){
+                    if (direction.getColumn() != 0 && checkPiece.getTeamColor() != piece.getTeamColor()){
 
-                            if (newRow == 8 || newRow == 1){
-                                moves = pawnPromotionMoves(myPosition, nextPos, moves);}
-                            else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                                moves.add(newMove);}
+                        if (newRow == 8 || newRow == 1){
+                            moves = pawnPromotionMoves(myPosition, nextPos, moves);}
+
+                        else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                            moves.add(newMove);}
 
 
-                        }
-                        else {blocked = true;}
-                    } else {
-                        if (!blocked && direction.getColumn()== 0) {
-                            if (newRow == 8 || newRow == 1){
-                                moves = pawnPromotionMoves(myPosition, nextPos, moves);
-                            }
-                            else{
-                                ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                                moves.add(newMove);}
-
-                        }
                     }
+                    else {blocked = true;}
+                } else {
+                    if (!blocked && direction.getColumn()== 0) {
+                        if (newRow == 8 || newRow == 1){
+                            moves = pawnPromotionMoves(myPosition, nextPos, moves);
+                        }
+                        else{
+                            ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                            moves.add(newMove);}
 
-
+                    }
                 }
             }
+
 
 
             return moves;
@@ -137,36 +138,33 @@ public class ChessPiece {
                     int newRow = nextPos.getRow();
                     int newCol = nextPos.getColumn();
 
-                    if (0 < newRow && newRow < 9 && 0 < newCol && newCol < 9) {
+                    if (!(0 < newRow && newRow < 9 && 0 < newCol && newCol < 9)) {
+                        keepChecking = false;
+                        continue;
+                    }
 
-                        ChessPiece checkPiece = board.getPiece(nextPos);
+                    ChessPiece checkPiece = board.getPiece(nextPos);
 
-                        if (checkPiece != null) {
+                    if (checkPiece != null) {
 
-                            if (checkPiece.getTeamColor() != piece.getTeamColor()) {
+                        if (checkPiece.getTeamColor() != piece.getTeamColor()) {
 
-                                ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                                moves.add(newMove);
-
-
-
-                            }
-                            keepChecking = false;
-                        } else {
                             ChessMove newMove = new ChessMove(myPosition, nextPos, null);
                             moves.add(newMove);
-                            newPos = nextPos;
-                            if(typerule.moveOnce){
-                                keepChecking = false;
-                            }
+
                         }
-
-
-                    } else {
                         keepChecking = false;
+                    } else {
+                        ChessMove newMove = new ChessMove(myPosition, nextPos, null);
+                        moves.add(newMove);
+                        newPos = nextPos;
+                        if(typerule.moveOnce){
+                            keepChecking = false;
+                        }
                     }
                 }
             }
+
             return moves;
         }
 

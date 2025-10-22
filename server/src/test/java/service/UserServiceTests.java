@@ -5,23 +5,22 @@ import dataaccess.MemoryDataAccess;
 import dataaccess.MemoryGameDataAccess;
 import datamodel.*;
 import org.junit.jupiter.api.*;
-import passoff.model.*;
-import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTests{
-    static final UserService userService = new UserService(new MemoryDataAccess(), new MemoryGameDataAccess(), new MemoryAuthDataAccess());
+    static final UserService USER_SERVICE = new UserService(new MemoryDataAccess(), new MemoryGameDataAccess(), new MemoryAuthDataAccess());
     RegistrationRequest user = new RegistrationRequest("goodfarmswithscar", "well hello there", "struggling rn");
     RegistrationResult registrationResult;
 
     @BeforeEach
 
     void clear() throws DataAccessException {
-        userService.delete(null);
+        USER_SERVICE.delete(null);
     }
 
     public void initRegister() throws DataAccessException {
-        registrationResult = userService.register(user);
+        registrationResult = USER_SERVICE.register(user);
     }
 
     @Test
@@ -31,7 +30,7 @@ public class UserServiceTests{
                 new RegistrationRequest("Cry", "well hello there", "ohboy")
         };
         for (RegistrationRequest user : testers) {
-            RegistrationResult result = userService.register(user);
+            RegistrationResult result = USER_SERVICE.register(user);
             assertEquals(user.username(), result.username());
             assertNotNull(result.authToken());
 
@@ -45,7 +44,7 @@ public class UserServiceTests{
         initRegister();
         RegistrationRequest tester1 = new RegistrationRequest("goodfarmswithscar", "well hello there", "struggling rn");
 
-        assertThrows(DataAccessException.class, () -> userService.register(tester1));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.register(tester1));
     }
 
     @Test
@@ -53,14 +52,14 @@ public class UserServiceTests{
 
         RegistrationRequest tester1 = new RegistrationRequest(null, "well hello there", "struggling rn");
 
-        assertThrows(DataAccessException.class, () -> userService.register(tester1));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.register(tester1));
     }
 
     @Test
     public void loginPass() throws DataAccessException {
         initRegister();
         LoginRequest request = new LoginRequest(user.username(), user.password());
-        LoginResult result = userService.login(request);
+        LoginResult result = USER_SERVICE.login(request);
 
         assertEquals(request.username(), result.username());
         assertNotNull(result.authToken());
@@ -72,28 +71,28 @@ public class UserServiceTests{
         LoginRequest requestNoUser = new LoginRequest(null, user.password());
 
 
-        assertThrows(DataAccessException.class, () -> userService.login(requestNoUser));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.login(requestNoUser));
         LoginRequest requestNoPass = new LoginRequest(user.username(), null);
-        assertThrows(DataAccessException.class, () -> userService.login(requestNoPass));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.login(requestNoPass));
     }
 
     @Test
     public void logoutPass() throws DataAccessException {
         initRegister();
-        assertNotNull(userService.logout(registrationResult.authToken()));
+        assertNotNull(USER_SERVICE.logout(registrationResult.authToken()));
     }
 
     @Test
     public void logoutFail() throws DataAccessException {
         initRegister();
-        assertThrows(DataAccessException.class, () -> userService.logout(null));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.logout(null));
 
-        assertDoesNotThrow(() -> userService.logout(registrationResult.authToken()));
-        assertThrows(DataAccessException.class, () -> userService.logout(registrationResult.authToken()));
+        assertDoesNotThrow(() -> USER_SERVICE.logout(registrationResult.authToken()));
+        assertThrows(DataAccessException.class, () -> USER_SERVICE.logout(registrationResult.authToken()));
     }
 
     @Test
     public void clearPass() throws DataAccessException {
-        DeleteResult result = userService.delete(null);
+        DeleteResult result = USER_SERVICE.delete(null);
     }
 }
