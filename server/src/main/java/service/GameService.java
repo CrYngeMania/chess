@@ -18,7 +18,7 @@ public class GameService {
     private final AuthDataAccess authDataAccess;
     private final AuthService authService;
 
-    public GameService(GameDataAccess gameDataAccess, DataAccess dataAccess, AuthDataAccess authDataAccess) {
+    public GameService(GameDataAccess gameDataAccess, AuthDataAccess authDataAccess) {
         this.gameDataAccess = gameDataAccess;
         this.authDataAccess = authDataAccess;
         this.authService = new AuthService(authDataAccess);

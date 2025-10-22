@@ -1,155 +1,99 @@
 package service;
-
-
+import dataaccess.DataAccessException;
+import dataaccess.MemoryAuthDataAccess;
+import dataaccess.MemoryDataAccess;
+import dataaccess.MemoryGameDataAccess;
+import datamodel.*;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
-import passoff.server.TestServerFacade;
-import server.Server;
-
-import java.net.HttpURLConnection;
 import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-
-public class UserServiceTests {
-
-    private static TestUser existingUser;
-    private static TestUser newUser;
-    private static TestServerFacade serverFacade;
-    private static Server server;
-    private String existingAuth;
-    private static TestCreateRequest createRequest;
-
-
-    @AfterAll
-    static void stopServer() {
-        server.stop();
-    }
-
-    @BeforeAll
-    public static void init() {
-        server = new Server();
-        var port = server.run(0);
-        System.out.println("Started test HTTP server on " + port);
-
-        serverFacade = new TestServerFacade("localhost", Integer.toString(port));
-        existingUser = new TestUser("ExistingUser", "existingUserPassword", "eu@mail.com");
-        newUser = new TestUser("NewUser", "newUserPassword", "nu@mail.com");
-        createRequest = new TestCreateRequest("testGame");
-    }
+public class UserServiceTests{
+    static final UserService userService = new UserService(new MemoryDataAccess(), new MemoryGameDataAccess(), new MemoryAuthDataAccess());
+    RegistrationRequest user = new RegistrationRequest("goodfarmswithscar", "well hello there", "struggling rn");
+    RegistrationResult registrationResult;
 
     @BeforeEach
-    public void setup() {
-        serverFacade.clear();
 
-        //one user already logged in
-        TestAuthResult regResult = serverFacade.register(existingUser);
-        existingAuth = regResult.getAuthToken();
+    void clear() throws DataAccessException {
+        userService.delete(null);
+    }
+
+    public void initRegister() throws DataAccessException {
+        registrationResult = userService.register(user);
     }
 
     @Test
-    public void registerPass() {
-        TestUser[] testers = {
-                newUser,
-                new TestUser("tester", "well hello there", "struggling rn"),
-                new TestUser("goodfarmswithscar", "well hello there", "good"),
-                new TestUser("Cry", "well hello there", "ohboy")
+    public void registerPass() throws DataAccessException {
+        RegistrationRequest[] testers = {
+                new RegistrationRequest("tester", "well hello there", "struggling rn"),
+                new RegistrationRequest("Cry", "well hello there", "ohboy")
         };
-        for (TestUser user : testers) {
-            TestAuthResult registerResult = serverFacade.register(user);
-            assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+        for (RegistrationRequest user : testers) {
+            RegistrationResult result = userService.register(user);
+            assertEquals(user.username(), result.username());
+            assertNotNull(result.authToken());
+
         }
     }
 
+
+
     @Test
-    public void registerFailDupeNames(){
+    public void registerFailDupeNames() throws DataAccessException {
+        initRegister();
+        RegistrationRequest tester1 = new RegistrationRequest("goodfarmswithscar", "well hello there", "struggling rn");
 
-        TestUser tester1 = new TestUser("goodfarmswithscar", "well hello there", "struggling rn");
-        TestUser tester1Copy = new TestUser("goodfarmswithscar", "well hello there", "good");
-
-
-        TestAuthResult registerResult = serverFacade.register(tester1);
-        TestAuthResult registerResult2 = serverFacade.register(tester1Copy);
-        assertHttpForbidden(registerResult2);
+        assertThrows(DataAccessException.class, () -> userService.register(tester1));
     }
 
     @Test
-    public void registerFailNoName(){
+    public void registerFailNoName() throws DataAccessException {
 
-        TestUser tester1 = new TestUser(null, "well hello there", "struggling rn");
+        RegistrationRequest tester1 = new RegistrationRequest(null, "well hello there", "struggling rn");
 
-        TestAuthResult registerResult = serverFacade.register(tester1);
-        assertHttpBadRequest(registerResult);
+        assertThrows(DataAccessException.class, () -> userService.register(tester1));
     }
 
     @Test
-    public void loginPass(){
-        TestAuthResult loginResult = serverFacade.login(existingUser);
-        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+    public void loginPass() throws DataAccessException {
+        initRegister();
+        LoginRequest request = new LoginRequest(user.username(), user.password());
+        LoginResult result = userService.login(request);
+
+        assertEquals(request.username(), result.username());
+        assertNotNull(result.authToken());
     }
 
     @Test
-    public void loginFail(){
-        TestAuthResult loginResult = serverFacade.login(new TestUser(existingUser.getUsername(), null, existingUser.getEmail()));
-        assertHttpBadRequest(loginResult);
+    public void loginFail() throws DataAccessException {
+        initRegister();
+        LoginRequest requestNoUser = new LoginRequest(null, user.password());
 
-        TestAuthResult loginResultUser = serverFacade.login(new TestUser(null, existingUser.getPassword(), existingUser.getEmail()));
-        assertHttpBadRequest(loginResult);
 
-        TestAuthResult loginResultBadPassword = serverFacade.login(new TestUser(existingUser.getUsername(), "i", existingUser.getEmail()));
-        assertHttpUnauthorized(loginResult);
+        assertThrows(DataAccessException.class, () -> userService.login(requestNoUser));
+        LoginRequest requestNoPass = new LoginRequest(user.username(), null);
+        assertThrows(DataAccessException.class, () -> userService.login(requestNoPass));
     }
 
     @Test
-    public void logoutPass(){
-        TestResult logoutResult = serverFacade.logout(existingAuth);
-        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+    public void logoutPass() throws DataAccessException {
+        initRegister();
+        assertNotNull(userService.logout(registrationResult.authToken()));
     }
 
     @Test
-    public void logoutFail(){
-        TestResult logoutResult = serverFacade.logout(null);
-        assertHttpUnauthorized(logoutResult);
-        TestResult logoutResultFirst = serverFacade.logout(existingAuth);
-        TestResult logoutResultSecond = serverFacade.logout(existingAuth);
-        assertHttpUnauthorized(logoutResultSecond);
+    public void logoutFail() throws DataAccessException {
+        initRegister();
+        assertThrows(DataAccessException.class, () -> userService.logout(null));
 
+        assertDoesNotThrow(() -> userService.logout(registrationResult.authToken()));
+        assertThrows(DataAccessException.class, () -> userService.logout(registrationResult.authToken()));
     }
 
     @Test
-    public void clearPass(){
-        TestResult clearResult = serverFacade.clear();
-        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
-
-        TestCreateResult createGameResult = serverFacade.createGame(createRequest, existingAuth);
-        TestCreateResult createGameResult2 = serverFacade.createGame(new TestCreateRequest("Well hello there"), existingAuth);
-        TestResult clearMultiple = serverFacade.clear();
-        assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
+    public void clearPass() throws DataAccessException {
+        DeleteResult result = userService.delete(null);
     }
-
-
-
-    private void assertHttpBadRequest(TestResult result) {
-        assertHttpError(result, HttpURLConnection.HTTP_BAD_REQUEST, "Bad Request");
-    }
-
-    private void assertHttpUnauthorized(TestResult result) {
-        assertHttpError(result, HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
-    }
-
-    private void assertHttpForbidden(TestResult result) {
-        assertHttpError(result, HttpURLConnection.HTTP_FORBIDDEN, "Forbidden");
-    }
-
-    private void assertHttpError(TestResult result, int statusCode, String message) {
-        Assertions.assertEquals(statusCode, serverFacade.getStatusCode(),
-                "Server response code was not %d %s (message: %s)".formatted(statusCode, message, result.getMessage()));
-        Assertions.assertNotNull(result.getMessage(), "Invalid Request didn't return an error message");
-        Assertions.assertTrue(result.getMessage().toLowerCase(Locale.ROOT).contains("error"),
-                "Error message didn't contain the word \"Error\"");
-    }
-
-
-
 }

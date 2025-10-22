@@ -26,7 +26,7 @@ public class Server {
         authDataAccess = new MemoryAuthDataAccess();
 
         userService = new UserService(dataAccess, gameDataAccess, authDataAccess);
-        gameService = new GameService(gameDataAccess, dataAccess, authDataAccess);
+        gameService = new GameService(gameDataAccess, authDataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
@@ -48,7 +48,7 @@ public class Server {
 
     }
 
-    private void register(Context ctx){
+    public void register(Context ctx){
         var serialiser = new Gson();
         try {
             var req = serialiser.fromJson(ctx.body(), RegistrationRequest.class);
