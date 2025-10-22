@@ -49,7 +49,7 @@ public class GameServiceTests {
 
 
     @Test
-    public void createGameSuccess() {
+    public void createGamePass() {
         TestCreateResult createGameResult = serverFacade.createGame(createRequest, existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
@@ -64,7 +64,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void listGamesSuccess(){
+    public void listGamesPass(){
         TestListResult listGamesResult = serverFacade.listGames(existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
 
@@ -84,7 +84,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void joinGameSuccess(){
+    public void joinGamePass(){
         TestCreateResult createGame = serverFacade.createGame(new TestCreateRequest("hello miners and crafters"), existingAuth);
         TestResult joinGameResult = serverFacade.joinPlayer(new TestJoinRequest("WHITE", createGame.getGameID()), existingAuth);
         TestResult joinGameResult2 = serverFacade.joinPlayer(new TestJoinRequest("BLACK", createGame.getGameID()), existingAuth);

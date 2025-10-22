@@ -31,10 +31,9 @@ public class ChessBoard {
                 if (board[i][j] != null){
                     ChessPosition check = new ChessPosition(i+1,j+1);
                     ChessPiece piece = getPiece(check);
-                    if (piece != null){
-                        if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color){
-                            return check;
-                        }
+                    if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == color){
+                        return check;
+
                     }
 
                 }

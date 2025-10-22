@@ -28,7 +28,7 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public RegistrationResult register(RegistrationRequest request) throws DataAccessException{
+    public registrationresult register(registrationrequest request) throws DataAccessException{
         if (dataAccess.getUser(request.username()) != null){
             throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
             /** username taken **/
@@ -45,11 +45,11 @@ public class UserService {
         AuthData reg = new AuthData(request.username(), token);
         authDataAccess.saveAuth(reg);
 
-        return new RegistrationResult(request.username(), token);
+        return new registrationresult(request.username(), token);
 
     }
 
-    public LoginResult login(LoginRequest request) throws DataAccessException{
+    public loginresult login(loginrequest request) throws DataAccessException{
         UserData checkUser = dataAccess.getUser(request.username());
         if (request.username() == null){
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No username provided");
@@ -69,22 +69,22 @@ public class UserService {
         AuthData reg = new AuthData(request.username(), token);
         authDataAccess.saveAuth(reg);
 
-        return new LoginResult(request.username(), token);
+        return new loginresult(request.username(), token);
     }
 
-    public LogoutResult logout(String authToken) throws DataAccessException {
+    public logoutresult logout(String authToken) throws DataAccessException {
         authService.checkAuth(authToken);
         AuthData currAuth = authDataAccess.getAuth(authToken);
         authDataAccess.deleteAuth(currAuth);
 
-        return new LogoutResult();
+        return new logoutresult();
     }
 
-    public DeleteResult delete(String authToken) throws DataAccessException{
+    public deleteresult delete(String authToken) throws DataAccessException{
         dataAccess.clear();
         gameDataAccess.clear();
         authDataAccess.clear();
-        return new DeleteResult();
+        return new deleteresult();
 
     }
 }

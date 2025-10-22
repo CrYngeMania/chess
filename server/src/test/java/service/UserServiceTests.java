@@ -49,7 +49,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void registerSuccess() {
+    public void registerPass() {
         TestUser[] testers = {
                 newUser,
                 new TestUser("tester", "well hello there", "struggling rn"),
@@ -84,7 +84,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void loginSuccess(){
+    public void loginPass(){
         TestAuthResult loginResult = serverFacade.login(existingUser);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
     }
@@ -97,12 +97,12 @@ public class UserServiceTests {
         TestAuthResult loginResultUser = serverFacade.login(new TestUser(null, existingUser.getPassword(), existingUser.getEmail()));
         assertHttpBadRequest(loginResult);
 
-        TestAuthResult loginResultBadPassword = serverFacade.login(new TestUser(existingUser.getUsername(), "Well hello there", existingUser.getEmail()));
+        TestAuthResult loginResultBadPassword = serverFacade.login(new TestUser(existingUser.getUsername(), "i", existingUser.getEmail()));
         assertHttpUnauthorized(loginResult);
     }
 
     @Test
-    public void logoutSuccess(){
+    public void logoutPass(){
         TestResult logoutResult = serverFacade.logout(existingAuth);
         assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode());
     }

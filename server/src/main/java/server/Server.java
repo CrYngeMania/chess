@@ -51,7 +51,7 @@ public class Server {
     private void register(Context ctx){
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), RegistrationRequest.class);
+            var req = serialiser.fromJson(ctx.body(), registrationrequest.class);
             var response = userService.register(req);
             ctx.result(serialiser.toJson(response));
         }
@@ -74,7 +74,7 @@ public class Server {
     private void login(Context ctx){
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), LoginRequest.class);
+            var req = serialiser.fromJson(ctx.body(), loginrequest.class);
             var response = userService.login(req);
             ctx.result(serialiser.toJson(response));
         }
@@ -120,7 +120,7 @@ public class Server {
     private void createGame(Context ctx){
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), CreateGameRequest.class);
+            var req = serialiser.fromJson(ctx.body(), creategamerequest.class);
             var token = ctx.header("Authorization");
             var response = gameService.createGame(req, token);
             ctx.result(serialiser.toJson(response));
@@ -144,7 +144,7 @@ public class Server {
     public void joinGame(Context ctx) {
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), JoinGameRequest.class);
+            var req = serialiser.fromJson(ctx.body(), joingamerequest.class);
             var token = ctx.header("Authorization");
             var response = gameService.joinGame(req, token);
             ctx.result(serialiser.toJson(response));

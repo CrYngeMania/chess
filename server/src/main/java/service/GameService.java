@@ -36,7 +36,7 @@ public class GameService {
         }
     }
 
-    public CreateGameResult createGame(CreateGameRequest request, String authToken) throws DataAccessException {
+    public creategameresult createGame(creategamerequest request, String authToken) throws DataAccessException {
         authService.checkAuth(authToken);
         if (request.gameName() == null) {
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No game name provided");
@@ -44,18 +44,18 @@ public class GameService {
 
         Integer gameID = generateID();
         gameDataAccess.saveGame(new GameData(gameID, null, null, request.gameName(), new ChessGame()));
-        return new CreateGameResult(gameID);
+        return new creategameresult(gameID);
     }
 
-    public ListGameResult listGame(String authToken) throws DataAccessException{
+    public listgameresult listGame(String authToken) throws DataAccessException{
         authService.checkAuth(authToken);
 
         ArrayList<GameData> gamesList = gameDataAccess.getGamesList();
-        return new ListGameResult(gamesList);
+        return new listgameresult(gamesList);
 
     }
 
-    public JoinGameResult joinGame(JoinGameRequest request, String authToken) throws DataAccessException{
+    public joingameresult joinGame(joingamerequest request, String authToken) throws DataAccessException{
         authService.checkAuth(authToken);
         AuthData currAuth = authDataAccess.getAuth(authToken);
 
@@ -82,7 +82,7 @@ public class GameService {
             GameData newGame = new GameData(request.gameID(), game.whiteUsername(), currAuth.username(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);
         }
-        return new JoinGameResult();
+        return new joingameresult();
     }
 
 
