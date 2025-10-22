@@ -5,6 +5,7 @@ import model.GameData;
 import model.UserData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public interface DataAccess {
@@ -14,9 +15,9 @@ public interface DataAccess {
     AuthData getAuth(String token);
     void deleteAuth(AuthData auth);
     void saveAuth(AuthData auth);
-    void setCurrAuth(AuthData auth);
-    AuthData getCurrAuth();
     void saveGame(GameData game);
     GameData getGame(Integer gameID);
     ArrayList<GameData> getGamesList();
+    void updateGame(Integer gameID, GameData newGame);
+    HashMap<String, AuthData> getAuths();
 }

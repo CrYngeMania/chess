@@ -1,16 +1,14 @@
 package server;
 
 import com.google.gson.Gson;
-import dataModel.CreateGameRequest;
+import dataModel.*;
 import dataaccess.DataAccessException;
-import model.GameData;
-import model.UserData;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
-import java.util.UUID;
+
 
 
 public class Server {
@@ -26,7 +24,7 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> ctx.result("{}"));
+        server.delete("db", this::delete);
 
         server.post("user", this::register);
 
@@ -38,19 +36,18 @@ public class Server {
 
         server.get("game", this::listGames);
 
+        server.put("game", this::joinGame);
+
         // Register your endpoints and exception handlers here.
 
     }
 
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
+
 
     private void register(Context ctx){
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), UserData.class);
-            var res = serialiser.toJson(req);
+            var req = serialiser.fromJson(ctx.body(), RegistrationRequest.class);
             var response = userService.register(req);
             ctx.result(serialiser.toJson(response));
         }
@@ -73,8 +70,7 @@ public class Server {
     private void login(Context ctx){
         var serialiser = new Gson();
         try {
-            var req = serialiser.fromJson(ctx.body(), UserData.class);
-            var res = serialiser.toJson(req);
+            var req = serialiser.fromJson(ctx.body(), LoginRequest.class);
             var response = userService.login(req);
             ctx.result(serialiser.toJson(response));
         }
@@ -97,7 +93,8 @@ public class Server {
     private void logout(Context ctx){
         var serialiser = new Gson();
         try {
-            var response = userService.logout();
+            var req = ctx.header("Authorization");
+            var response = userService.logout(req);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
@@ -120,8 +117,8 @@ public class Server {
         var serialiser = new Gson();
         try {
             var req = serialiser.fromJson(ctx.body(), CreateGameRequest.class);
-            var res = serialiser.toJson(req);
-            var response = userService.createGame(req);
+            var token = ctx.header("Authorization");
+            var response = userService.createGame(req, token);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
@@ -140,10 +137,59 @@ public class Server {
 
     }
 
+    public void joinGame(Context ctx) {
+        var serialiser = new Gson();
+        try {
+            var req = serialiser.fromJson(ctx.body(), JoinGameRequest.class);
+            var token = ctx.header("Authorization");
+            var response = userService.joinGame(req, token);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+
+        }
+
+    }
+
+
     public void listGames(Context ctx){
         var serialiser = new Gson();
         try {
-            var response = userService.listGame();
+            var req = ctx.header("Authorization");
+            var response = userService.listGame(req);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (DataAccessException ex){
+            ctx.status(ex.toHttpStatusCode());
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+        }
+        catch (Exception ex){
+            ctx.status(500);
+            ctx.result(serialiser.toJson(
+                    new ErrorResponse(ex.getMessage())
+            ));
+
+        }
+
+    }
+
+    public void delete(Context ctx){
+        var serialiser = new Gson();
+        try {
+            var req = ctx.header("Authorization");
+            var response = userService.delete(req);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){

@@ -13,11 +13,16 @@ public class MemoryDataAccess implements DataAccess {
     private HashMap<String, UserData> users = new HashMap<>();
     private HashMap<String, AuthData> auths = new HashMap<>();
     private HashMap<Integer, GameData> games = new HashMap<>();
-    private AuthData currAuth;
+
 
     @Override
     public void clear(){
-
+        users.clear();
+        auths.clear();
+        games.clear();
+    }
+    public HashMap<String, AuthData> getAuths(){
+        return auths;
     }
 
     @Override
@@ -44,15 +49,6 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void setCurrAuth(AuthData auth) {
-        currAuth = auth;
-    }
-
-    @Override
-    public AuthData getCurrAuth(){return currAuth;
-    };
-
-    @Override
     public void saveGame(GameData game) {
         games.put(game.gameID(), game);
     }
@@ -65,6 +61,12 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public ArrayList<GameData> getGamesList() {
         return new ArrayList<>(games.values());
+    }
+
+    @Override
+    public void updateGame(Integer gameID, GameData newGame){
+        games.put(gameID, newGame);
+
     }
 
 }
