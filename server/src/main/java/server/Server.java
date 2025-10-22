@@ -2,11 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import dataModel.*;
-import dataaccess.DataAccessException;
-import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
+import service.GameService;
 import service.UserService;
 
 
@@ -15,12 +14,16 @@ public class Server {
 
     private final Javalin server;
     private UserService userService;
+    private GameService gameService;
     private DataAccess dataAccess;
+    private GameDataAccess gameDataAccess;
 
     public Server() {
 
         dataAccess = new MemoryDataAccess();
-        userService = new UserService(dataAccess);
+        gameDataAccess = new MemoryGameDataAccess();
+        userService = new UserService(dataAccess, gameDataAccess);
+        gameService = new GameService(gameDataAccess, dataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
@@ -41,8 +44,6 @@ public class Server {
         // Register your endpoints and exception handlers here.
 
     }
-
-
 
     private void register(Context ctx){
         var serialiser = new Gson();
@@ -118,7 +119,7 @@ public class Server {
         try {
             var req = serialiser.fromJson(ctx.body(), CreateGameRequest.class);
             var token = ctx.header("Authorization");
-            var response = userService.createGame(req, token);
+            var response = gameService.createGame(req, token);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
@@ -142,7 +143,7 @@ public class Server {
         try {
             var req = serialiser.fromJson(ctx.body(), JoinGameRequest.class);
             var token = ctx.header("Authorization");
-            var response = userService.joinGame(req, token);
+            var response = gameService.joinGame(req, token);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
@@ -161,12 +162,11 @@ public class Server {
 
     }
 
-
     public void listGames(Context ctx){
         var serialiser = new Gson();
         try {
             var req = ctx.header("Authorization");
-            var response = userService.listGame(req);
+            var response = gameService.listGame(req);
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){

@@ -3,23 +3,24 @@ package dataaccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-
+import dataaccess.GameDataAccess;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class MemoryDataAccess implements DataAccess {
+    private GameDataAccess gameDataAccess;
 
     private HashMap<String, UserData> users = new HashMap<>();
     private HashMap<String, AuthData> auths = new HashMap<>();
-    private HashMap<Integer, GameData> games = new HashMap<>();
 
+    public MemoryDataAccess(){
+    }
 
     @Override
     public void clear(){
         users.clear();
         auths.clear();
-        games.clear();
     }
     public HashMap<String, AuthData> getAuths(){
         return auths;
@@ -46,27 +47,6 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public AuthData getAuth(String token) {
         return auths.get(token);
-    }
-
-    @Override
-    public void saveGame(GameData game) {
-        games.put(game.gameID(), game);
-    }
-
-    @Override
-    public GameData getGame(Integer gameID){
-        return games.get(gameID);
-    }
-
-    @Override
-    public ArrayList<GameData> getGamesList() {
-        return new ArrayList<>(games.values());
-    }
-
-    @Override
-    public void updateGame(Integer gameID, GameData newGame){
-        games.put(gameID, newGame);
-
     }
 
 }
