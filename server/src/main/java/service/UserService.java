@@ -1,6 +1,7 @@
 package service;
 
 import dataModel.*;
+import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
 import model.AuthData;
@@ -12,10 +13,15 @@ import java.util.UUID;
 public class UserService {
     private final DataAccess dataAccess;
     private final GameDataAccess gameDataAccess;
+    private final AuthDataAccess authDataAccess;
+    private final AuthService authService;
 
-    public UserService(DataAccess dataAccess, GameDataAccess gameDataAccess) {
+    public UserService(DataAccess dataAccess, GameDataAccess gameDataAccess, AuthDataAccess authDataAccess) {
         this.dataAccess = dataAccess;
         this.gameDataAccess = gameDataAccess;
+        this.authDataAccess = authDataAccess;
+        this.authService = new AuthService(authDataAccess);
+
     }
 
     public String generateToken() {
@@ -34,7 +40,7 @@ public class UserService {
 
         String token = generateToken();
         AuthData reg = new AuthData(request.username(), token);
-        dataAccess.saveAuth(reg);
+        authDataAccess.saveAuth(reg);
 
         return new RegistrationResult(request.username(), token);
 
@@ -58,25 +64,15 @@ public class UserService {
 
         String token = generateToken();
         AuthData reg = new AuthData(request.username(), token);
-        dataAccess.saveAuth(reg);
+        authDataAccess.saveAuth(reg);
 
         return new LoginResult(request.username(), token);
     }
 
-    public void checkAuth(String authToken) throws DataAccessException{
-        System.out.println(dataAccess.getAuths());
-        if (authToken == null){
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
-        if (dataAccess.getAuth(authToken) == null) {
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
-    }
-
     public LogoutResult logout(String authToken) throws DataAccessException {
-        checkAuth(authToken);
-        AuthData currAuth = dataAccess.getAuth(authToken);
-        dataAccess.deleteAuth(currAuth);
+        authService.checkAuth(authToken);
+        AuthData currAuth = authDataAccess.getAuth(authToken);
+        authDataAccess.deleteAuth(currAuth);
 
         return new LogoutResult();
     }
@@ -84,6 +80,7 @@ public class UserService {
     public DeleteResult delete(String authToken) throws DataAccessException{
         dataAccess.clear();
         gameDataAccess.clear();
+        authDataAccess.clear();
         return new DeleteResult();
 
     }

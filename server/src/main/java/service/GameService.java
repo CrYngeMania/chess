@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataModel.*;
+import dataaccess.AuthDataAccess;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
@@ -15,10 +16,15 @@ import java.util.Random;
 public class GameService {
     private final GameDataAccess gameDataAccess;
     private final DataAccess dataAccess;
+    private final AuthDataAccess authDataAccess;
+    private final AuthService authService;
 
-    public GameService(GameDataAccess gameDataAccess, DataAccess dataAccess) {
+    public GameService(GameDataAccess gameDataAccess, DataAccess dataAccess, AuthDataAccess authDataAccess) {
         this.gameDataAccess = gameDataAccess;
         this.dataAccess = dataAccess;
+        this.authDataAccess = authDataAccess;
+        this.authService = new AuthService(authDataAccess);
+
     }
 
     public Integer generateID() {
@@ -32,18 +38,8 @@ public class GameService {
         }
     }
 
-    public void checkAuth(String authToken) throws DataAccessException{
-        System.out.println(dataAccess.getAuths());
-        if (authToken == null){
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
-        if (dataAccess.getAuth(authToken) == null) {
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Unauthorised");
-        }
-    }
-
     public CreateGameResult createGame(CreateGameRequest request, String authToken) throws DataAccessException {
-        checkAuth(authToken);
+        authService.checkAuth(authToken);
         if (request.gameName() == null) {
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No game name provided");
         }
@@ -54,7 +50,7 @@ public class GameService {
     }
 
     public ListGameResult listGame(String authToken) throws DataAccessException{
-        checkAuth(authToken);
+        authService.checkAuth(authToken);
 
         ArrayList<GameData> gamesList = gameDataAccess.getGamesList();
         return new ListGameResult(gamesList);
@@ -62,8 +58,8 @@ public class GameService {
     }
 
     public JoinGameResult joinGame(JoinGameRequest request, String authToken) throws DataAccessException{
-        checkAuth(authToken);
-        AuthData currAuth = dataAccess.getAuth(authToken);
+        authService.checkAuth(authToken);
+        AuthData currAuth = authDataAccess.getAuth(authToken);
 
         GameData game = gameDataAccess.getGame(request.gameID());
         if (game == null) {

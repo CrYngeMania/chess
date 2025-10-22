@@ -17,13 +17,16 @@ public class Server {
     private GameService gameService;
     private DataAccess dataAccess;
     private GameDataAccess gameDataAccess;
+    private AuthDataAccess authDataAccess;
 
     public Server() {
 
         dataAccess = new MemoryDataAccess();
         gameDataAccess = new MemoryGameDataAccess();
-        userService = new UserService(dataAccess, gameDataAccess);
-        gameService = new GameService(gameDataAccess, dataAccess);
+        authDataAccess = new MemoryAuthDataAccess();
+
+        userService = new UserService(dataAccess, gameDataAccess, authDataAccess);
+        gameService = new GameService(gameDataAccess, dataAccess, authDataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
