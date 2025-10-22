@@ -15,13 +15,11 @@ import java.util.Random;
 
 public class GameService {
     private final GameDataAccess gameDataAccess;
-    private final DataAccess dataAccess;
     private final AuthDataAccess authDataAccess;
     private final AuthService authService;
 
     public GameService(GameDataAccess gameDataAccess, DataAccess dataAccess, AuthDataAccess authDataAccess) {
         this.gameDataAccess = gameDataAccess;
-        this.dataAccess = dataAccess;
         this.authDataAccess = authDataAccess;
         this.authService = new AuthService(authDataAccess);
 

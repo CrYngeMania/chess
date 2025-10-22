@@ -33,6 +33,9 @@ public class UserService {
             throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
             /** username taken **/
         }
+        if (request.username() == null){
+            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No username provided");
+        }
         if (request.password() == null){
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
         }
