@@ -1,6 +1,6 @@
 package service;
 
-import dataModel.*;
+import datamodel.*;
 import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
@@ -28,7 +28,7 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public registrationresult register(registrationrequest request) throws DataAccessException{
+    public RegistrationResult register(RegistrationRequest request) throws DataAccessException{
         if (dataAccess.getUser(request.username()) != null){
             throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
             /** username taken **/
@@ -45,11 +45,11 @@ public class UserService {
         AuthData reg = new AuthData(request.username(), token);
         authDataAccess.saveAuth(reg);
 
-        return new registrationresult(request.username(), token);
+        return new RegistrationResult(request.username(), token);
 
     }
 
-    public loginresult login(loginrequest request) throws DataAccessException{
+    public LoginResult login(LoginRequest request) throws DataAccessException{
         UserData checkUser = dataAccess.getUser(request.username());
         if (request.username() == null){
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No username provided");
@@ -69,22 +69,22 @@ public class UserService {
         AuthData reg = new AuthData(request.username(), token);
         authDataAccess.saveAuth(reg);
 
-        return new loginresult(request.username(), token);
+        return new LoginResult(request.username(), token);
     }
 
-    public logoutresult logout(String authToken) throws DataAccessException {
+    public LogoutResult logout(String authToken) throws DataAccessException {
         authService.checkAuth(authToken);
         AuthData currAuth = authDataAccess.getAuth(authToken);
         authDataAccess.deleteAuth(currAuth);
 
-        return new logoutresult();
+        return new LogoutResult();
     }
 
-    public deleteresult delete(String authToken) throws DataAccessException{
+    public DeleteResult delete(String authToken) throws DataAccessException{
         dataAccess.clear();
         gameDataAccess.clear();
         authDataAccess.clear();
-        return new deleteresult();
+        return new DeleteResult();
 
     }
 }
