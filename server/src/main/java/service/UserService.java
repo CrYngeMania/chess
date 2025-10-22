@@ -60,10 +60,11 @@ public class UserService {
             throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Username/password is invalid");
         }
 
-        AuthData reg = new AuthData(request.username(), generateToken());
+        String token = generateToken();
+        AuthData reg = new AuthData(request.username(), token);
         dataAccess.saveAuth(reg);
 
-        return new LoginResult(request.username(), generateToken());
+        return new LoginResult(request.username(), token);
     }
 
     public void checkAuth(String authToken) throws DataAccessException{
