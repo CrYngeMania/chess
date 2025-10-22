@@ -47,11 +47,11 @@ public class GameService {
         return new CreateGameResult(gameID);
     }
 
-    public listGameResult listGame(String authToken) throws DataAccessException{
+    public ListGameResult listGame(String authToken) throws DataAccessException{
         authService.checkAuth(authToken);
 
         ArrayList<GameData> gamesList = gameDataAccess.getGamesList();
-        return new listGameResult(gamesList);
+        return new ListGameResult(gamesList);
 
     }
 
