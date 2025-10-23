@@ -96,8 +96,8 @@ public class ChessPiece {
                         if (newRow == 8 || newRow == 1){
                             moves = pawnPromotionMoves(myPosition, nextPos, moves);}
 
-                        else{ChessMove newMove = new ChessMove(myPosition, nextPos, null);
-                            moves.add(newMove);}
+                        else{
+                            moves.add(new ChessMove(myPosition, nextPos, null));}
 
 
                     }

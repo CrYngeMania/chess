@@ -18,7 +18,7 @@ public class DataAccessException extends Exception{
         this.code = code;
 
     }
-
+/**
     public DataAccessException(Code code, String message, Throwable ex) {
         super(message, ex);
         this.code = code;
@@ -27,6 +27,7 @@ public class DataAccessException extends Exception{
     public Code code() {
         return code;
     }
+
 
     public static Code fromHttpStatusCode(int httpStatusCode) {
         return switch (httpStatusCode) {
@@ -37,6 +38,7 @@ public class DataAccessException extends Exception{
             default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
         };
     }
+     **/
 
     public int toHttpStatusCode() {
         return switch (code) {

@@ -91,30 +91,19 @@ public class ChessGame {
         if (startRow - endRow == 2 || startRow - endRow == -2){
             ChessPosition checkRight = new ChessPosition(startPosition.getRow(), startPosition.getColumn()+1);
             ChessPosition checkLeft = new ChessPosition(startPosition.getRow(), startPosition.getColumn()-1);
+
+            int rowDir = (piece.getTeamColor()== TeamColor.WHITE) ? 1 : -1;
             if (checkRight.equals(lastMove.getEndPosition())){
-                if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                    ChessPosition ePPos = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()+1);
-                    ChessMove ePRight = new ChessMove(startPosition, ePPos, null);
-                    valid.add(ePRight);
-                }
-                else{
-                    ChessPosition ePPos = new ChessPosition(startPosition.getRow()-1, startPosition.getColumn()+1);
-                    ChessMove ePRight = new ChessMove(startPosition, ePPos, null);
-                    valid.add(ePRight);
-                }
+                ChessPosition ePPos = new ChessPosition(startPosition.getRow()+ rowDir, startPosition.getColumn()+1);
+                ChessMove ePRight = new ChessMove(startPosition, ePPos, null);
+                valid.add(ePRight);
+
             }
             else if (checkLeft.equals(lastMove.getEndPosition())){
-                if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                    ChessPosition ePPos = new ChessPosition(startPosition.getRow()+1, startPosition.getColumn()-1);
-                    ChessMove ePLeft = new ChessMove(startPosition, ePPos, null);
-                    valid.add(ePLeft);
-                }
-                else{
-                    ChessPosition ePPos = new ChessPosition(startPosition.getRow()-1, startPosition.getColumn()-1);
-                    ChessMove ePLeft = new ChessMove(startPosition, ePPos, null);
-                    valid.add(ePLeft);
-                }
 
+                ChessPosition ePPos = new ChessPosition(startPosition.getRow()+rowDir, startPosition.getColumn()-1);
+                ChessMove ePLeft = new ChessMove(startPosition, ePPos, null);
+                valid.add(ePLeft);
             }
         }
 
