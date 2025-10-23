@@ -48,6 +48,20 @@ public class Server {
 
     }
 
+    public void dataErrors(Context ctx, Gson serialiser, DataAccessException ex){
+        ctx.status(ex.toHttpStatusCode());
+        ctx.result(serialiser.toJson(
+                new ErrorResponse(ex.getMessage())
+        ));
+    }
+    public void errors(Context ctx, Gson serialiser, Exception ex){
+        ctx.status(500);
+        ctx.result(serialiser.toJson(
+                new ErrorResponse(ex.getMessage())
+        ));
+    }
+
+
     public void register(Context ctx){
         var serialiser = new Gson();
         try {
@@ -56,16 +70,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            errors(ctx, serialiser, ex);
 
         }
 
@@ -79,17 +87,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
-
+            errors(ctx, serialiser, ex);
         }
 
     }
@@ -102,16 +103,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            errors(ctx, serialiser, ex);
 
         }
 
@@ -126,16 +121,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            errors(ctx, serialiser, ex);
 
         }
 
@@ -150,17 +139,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
-
+            errors(ctx, serialiser, ex);
         }
 
     }
@@ -173,16 +155,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            errors(ctx, serialiser, ex);
 
         }
 
@@ -196,17 +172,10 @@ public class Server {
             ctx.result(serialiser.toJson(response));
         }
         catch (DataAccessException ex){
-            ctx.status(ex.toHttpStatusCode());
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
+            dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
-            ctx.status(500);
-            ctx.result(serialiser.toJson(
-                    new ErrorResponse(ex.getMessage())
-            ));
-
+            errors(ctx, serialiser, ex);
         }
 
     }
