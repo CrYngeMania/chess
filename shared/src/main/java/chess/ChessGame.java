@@ -196,22 +196,27 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
+    public boolean checkTeamMoves(TeamColor teamColor){
+        Collection<ChessPosition> checkPieces;
+        if (teamColor == TeamColor.WHITE) {
+            checkPieces = getBoard().getTeamPieces(TeamColor.WHITE);
+        } else {
+            checkPieces = getBoard().getTeamPieces(TeamColor.BLACK);
+        }
+        for (ChessPosition position : checkPieces) {
+
+            Collection<ChessMove> valid = validMoves(position);
+            if (!valid.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     public boolean isInCheckmate(TeamColor teamColor){
         if (isInCheck(teamColor)){
-            Collection<ChessPosition> checkPieces;
-            if (teamColor == TeamColor.WHITE) {
-                checkPieces = getBoard().getTeamPieces(TeamColor.WHITE);
-            } else {
-                checkPieces = getBoard().getTeamPieces(TeamColor.BLACK);
-            }
-            for (ChessPosition position : checkPieces) {
-
-                Collection<ChessMove> valid = validMoves(position);
-                if (!valid.isEmpty()) {
-                    return false;
-                }
-            }
-            return true;
+            return checkTeamMoves(teamColor);
         }
         return false;
     }
@@ -225,20 +230,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         if(!isInCheck(teamColor)){
-            Collection<ChessPosition> checkPieces;
-            if (teamColor == TeamColor.WHITE) {
-                checkPieces = getBoard().getTeamPieces(TeamColor.WHITE);
-            } else {
-                checkPieces = getBoard().getTeamPieces(TeamColor.BLACK);
-            }
-            for (ChessPosition position : checkPieces) {
-
-                Collection<ChessMove> valid = validMoves(position);
-                if (!valid.isEmpty()) {
-                    return false;
-                }
-            }
-            return true;
+            return checkTeamMoves(teamColor);
         }
         return false;
 
