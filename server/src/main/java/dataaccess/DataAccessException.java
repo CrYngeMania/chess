@@ -1,5 +1,7 @@
 package dataaccess;
 
+import java.sql.SQLException;
+
 /**
  * Indicates there was an error connecting to the database
  */
@@ -11,11 +13,21 @@ public class DataAccessException extends Exception{
         TakenError,
         UnauthorisedError,
     }
-    final private Code code;
+    private Code code;
 
     public DataAccessException(Code code, String message) {
         super(message);
         this.code = code;
+
+    }
+
+    public DataAccessException(String message, Throwable ex) {
+        super(message, ex);
+
+    }
+
+    public DataAccessException(Throwable ex) {
+        super(ex);
 
     }
 

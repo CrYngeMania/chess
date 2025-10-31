@@ -10,6 +10,7 @@ import service.UserService;
 
 
 
+
 public class Server {
 
     private final Javalin server;
@@ -21,7 +22,7 @@ public class Server {
 
     public Server() {
 
-        dataAccess = new MemoryDataAccess();
+        dataAccess = new MySqlUserDataAccess();
         gameDataAccess = new MemoryGameDataAccess();
         authDataAccess = new MemoryAuthDataAccess();
 
