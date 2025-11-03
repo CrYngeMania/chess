@@ -16,7 +16,7 @@ class MySqlUserDataAccess implements DataAccess {
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE users, auths, games";
+        var statement = "TRUNCATE users";
         handler.executeQuery(statement);
     }
 
@@ -33,7 +33,7 @@ class MySqlUserDataAccess implements DataAccess {
             var statement = "SELECT username, password, email FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setObject(1, username);
-                try (ResultSet result = ps.executeQuery(username)) {
+                try (ResultSet result = ps.executeQuery()) {
                     if (result.next()) {
                         return readUser(result);
                     }
