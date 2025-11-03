@@ -10,6 +10,6 @@ import java.util.HashMap;
 
 public interface DataAccess {
     void clear();
-    void saveUser(UserData user);
+    void saveUser(UserData user) throws DataAccessException;
     UserData getUser(String username);
 }

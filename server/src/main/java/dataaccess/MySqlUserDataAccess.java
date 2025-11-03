@@ -1,8 +1,12 @@
 package dataaccess;
 
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
@@ -11,26 +15,40 @@ class MySqlUserDataAccess implements DataAccess {
     MySqlDatabaseHandler handler = new MySqlDatabaseHandler();
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE users, auths, games";
+        handler.executeQuery(statement);
     }
 
     @Override
-    public void saveUser(UserData user) {
-
+    public void saveUser(UserData user) throws DataAccessException {
+        String hashedPassword = handler.createUserPassword(user.password());
+        var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
+        handler.executeQuery(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
-    public UserData getUser(String username) {
-        return null;
+    public UserData getUser(String username) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, password, email FROM users WHERE username=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setObject(1, username);
+                try (ResultSet result = ps.executeQuery(username)) {
+                    if (result.next()) {
+                        return readUser(result);
+                    }
+                }
+            }
+        }catch (SQLException e) {
+            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
+        }
     }
 
-    String createUserPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
-    boolean verifyUser(String username, String clearTextPassword) {
-        return true;
+    private UserData readUser(ResultSet result) throws SQLException{
+        String username = result.getString("username");
+        String password = result.getString("password");
+        String email = result.getString("email");
+        return new UserData(username, password, email);
     }
 
     void configureDatabase() throws DataAccessException {
