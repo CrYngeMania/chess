@@ -8,9 +8,6 @@ import io.javalin.http.Context;
 import service.GameService;
 import service.UserService;
 
-
-
-
 public class Server {
 
     private final Javalin server;
@@ -22,7 +19,7 @@ public class Server {
 
     public Server() {
 
-        dataAccess = new MySqlUserDataAccess();
+        dataAccess = new MemoryDataAccess();
         gameDataAccess = new MemoryGameDataAccess();
         authDataAccess = new MemoryAuthDataAccess();
 
