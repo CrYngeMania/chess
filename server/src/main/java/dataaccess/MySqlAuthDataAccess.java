@@ -24,7 +24,7 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
                 }
             }
         }catch (SQLException e) {
-            throw new DataAccessException("Error: Database error", e);
+            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
         }
         return null;
     }

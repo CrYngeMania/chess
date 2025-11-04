@@ -60,7 +60,7 @@ public class UserService {
         if (request.password() == null){
             throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
         }
-        if (dataAccess.verifyUser(checkUser.username(), checkUser.password())){
+        if (!dataAccess.verifyUser(checkUser.username(), request.password())){
             throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Username/password is invalid");
         }
 

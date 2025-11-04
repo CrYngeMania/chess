@@ -80,7 +80,7 @@ public class MySqlDatabaseHandler {
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Hi error is here Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to configure database");
         }
     }
 

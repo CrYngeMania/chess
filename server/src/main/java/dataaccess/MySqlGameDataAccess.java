@@ -35,7 +35,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
                 }
             }
         }catch (SQLException e) {
-            throw new DataAccessException("Error: Database error", e);
+            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
         }
         return null;
     }
@@ -51,7 +51,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
             ChessGame game = serialiser.fromJson(jsonGame, ChessGame.class);
             return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
         }catch(SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error:");
+            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: database error");
         }
 
     }

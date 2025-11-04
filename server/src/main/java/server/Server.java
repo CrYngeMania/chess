@@ -23,7 +23,7 @@ public class Server {
         try {
             dataAccess.configureDatabase();
         } catch (DataAccessException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException("Error: Database compilation error");
         }
 
         userService = new UserService(dataAccess, gameDataAccess, authDataAccess);
@@ -52,13 +52,13 @@ public class Server {
     public void dataErrors(Context ctx, Gson serialiser, DataAccessException ex){
         ctx.status(ex.toHttpStatusCode());
         ctx.result(serialiser.toJson(
-                new ErrorResponse(ex.getMessage())
+                new ErrorResponse("Error:" + ex.getMessage())
         ));
     }
     public void errors(Context ctx, Gson serialiser, Exception ex){
         ctx.status(500);
         ctx.result(serialiser.toJson(
-                new ErrorResponse(ex.getMessage())
+                new ErrorResponse("Error:" + ex.getMessage())
         ));
     }
 

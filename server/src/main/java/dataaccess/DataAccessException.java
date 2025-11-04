@@ -20,15 +20,15 @@ public class DataAccessException extends Exception{
         this.code = code;
 
     }
-
     public DataAccessException(String message, Throwable ex) {
         super(message, ex);
+        this.code = Code.ServerError;
 
     }
 
     public DataAccessException(Throwable ex) {
         super(ex);
-
+        this.code = Code.ServerError;
     }
 
     public int toHttpStatusCode() {
