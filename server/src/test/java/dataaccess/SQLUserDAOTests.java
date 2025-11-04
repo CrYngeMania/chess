@@ -1,7 +1,5 @@
-package service;
+package dataaccess;
 
-import dataaccess.DataAccessException;
-import dataaccess.MySqlUserDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
