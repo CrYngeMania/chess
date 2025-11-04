@@ -33,8 +33,14 @@ public class SQLAuthServiceTests {
     }
 
     @Test
-    void saveAuthFail() throws DataAccessException {
+    void saveAuthFailNothing() throws DataAccessException {
         AuthData auth = new AuthData(null, null);
+        assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
+    }
+
+    @Test
+    void saveAuthFailNoToken() throws DataAccessException {
+        AuthData auth = new AuthData("howdy howdy howdy", null);
         assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
     }
 

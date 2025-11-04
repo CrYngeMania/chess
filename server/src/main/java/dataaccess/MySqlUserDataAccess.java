@@ -53,7 +53,7 @@ public class MySqlUserDataAccess implements DataAccess {
 
     public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
         UserData user = getUser(username);
-        if (user == null) return false;
+        if (user == null){ return false;}
 
         String hashedPassword = user.password();
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);

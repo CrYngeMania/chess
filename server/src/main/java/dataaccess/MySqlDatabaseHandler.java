@@ -15,25 +15,23 @@ public class MySqlDatabaseHandler {
 
     void executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    switch (param) {
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        case GameData p -> ps.setString(i + 1, p.toString());
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {
-                        }
+        PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < params.length; i++) {
+                Object param = params[i];
+                switch (param) {
+                    case String p -> ps.setString(i + 1, p);
+                    case Integer p -> ps.setInt(i + 1, p);
+                    case GameData p -> ps.setString(i + 1, p.toString());
+                    case null -> ps.setNull(i + 1, NULL);
+                    default -> {
                     }
                 }
-                ps.executeUpdate();
+            }
+            ps.executeUpdate();
 
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    rs.getInt(1);
-                }
-
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                rs.getInt(1);
             }
         } catch (SQLException | DataAccessException ex){
             throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to update database.");
