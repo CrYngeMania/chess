@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SQLGameServiceTests {
+public class SQLGameDAOTests {
 
     private final MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
     private final MySqlGameDataAccess gameAccess = new MySqlGameDataAccess();

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SQLAuthServiceTests {
+public class SQLAuthDAOTests {
 
     private final MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
     private final MySqlAuthDataAccess authAccess = new MySqlAuthDataAccess();
