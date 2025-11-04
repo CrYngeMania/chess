@@ -64,5 +64,29 @@ public class SQLUserServiceTests {
         assertNull(access.getUser(null));
     }
 
-    public void
+    @Test
+    public void verifyUserSuccess() throws DataAccessException {
+        UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
+        access.saveUser(user);
+
+        assertTrue(access.verifyUser(user.username(), user.password()));
+    }
+
+    @Test
+    public void verifyUserFail() throws DataAccessException {
+        UserData user = new UserData("Scarrrrrr", "dippledop", "mail");
+        access.saveUser(user);
+
+        assertFalse(access.verifyUser(user.username(), "hi"));
+
+    }
+
+    @Test
+    public void clearSuccess() throws DataAccessException {
+        UserData user = new UserData("whats up", "dippledop", "mail");
+        access.saveUser(user);
+
+        access.clear();
+        assertNull(access.getUser(user.username()));
+    }
 }
