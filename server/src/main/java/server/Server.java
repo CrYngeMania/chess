@@ -16,9 +16,15 @@ public class Server {
 
     public Server() {
 
-        DataAccess dataAccess = new MemoryDataAccess();
-        GameDataAccess gameDataAccess = new MemoryGameDataAccess();
-        AuthDataAccess authDataAccess = new MemoryAuthDataAccess();
+        MySqlUserDataAccess dataAccess = new MySqlUserDataAccess();
+        GameDataAccess gameDataAccess = new MySqlGameDataAccess();
+        AuthDataAccess authDataAccess = new MySqlAuthDataAccess();
+
+        try {
+            dataAccess.configureDatabase();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException(ex);
+        }
 
         userService = new UserService(dataAccess, gameDataAccess, authDataAccess);
         gameService = new GameService(gameDataAccess, authDataAccess);

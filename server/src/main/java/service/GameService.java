@@ -25,7 +25,7 @@ public class GameService {
 
     }
 
-    public Integer generateID() {
+    public Integer generateID() throws DataAccessException {
         while(true) {
             Random random = new Random();
             int bound = 1000000;

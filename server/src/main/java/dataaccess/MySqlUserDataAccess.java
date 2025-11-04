@@ -1,8 +1,6 @@
 package dataaccess;
 
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,21 +8,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-class MySqlUserDataAccess implements DataAccess {
+public class MySqlUserDataAccess implements DataAccess {
 
     MySqlDatabaseHandler handler = new MySqlDatabaseHandler();
 
     @Override
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE users";
-        handler.executeQuery(statement);
+        handler.executeUpdate(statement);
     }
 
     @Override
     public void saveUser(UserData user) throws DataAccessException {
         String hashedPassword = handler.createUserPassword(user.password());
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        handler.executeQuery(statement, user.username(), hashedPassword, user.email());
+        handler.executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
@@ -52,7 +50,7 @@ class MySqlUserDataAccess implements DataAccess {
         return new UserData(username, password, email);
     }
 
-    void configureDatabase() throws DataAccessException {
+    public void configureDatabase() throws DataAccessException {
         handler.configureDatabase();
     }
 }

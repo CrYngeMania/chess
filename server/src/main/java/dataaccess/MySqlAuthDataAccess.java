@@ -38,19 +38,19 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
     @Override
     public void deleteAuth(AuthData auth) throws DataAccessException {
         String statement = "DELETE FROM auths WHERE authToken=?";
-        handler.executeQuery(statement, auth.authToken());
+        handler.executeUpdate(statement, auth.authToken());
 
     }
 
     @Override
     public void saveAuth(AuthData auth) throws DataAccessException {
         var statement = "INSERT INTO auths (username, authToken) VALUES (?, ?)";
-        handler.executeQuery(statement, auth.username(), auth.authToken());
+        handler.executeUpdate(statement, auth.username(), auth.authToken());
     }
 
     @Override
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE auths";
-        handler.executeQuery(statement);
+        handler.executeUpdate(statement);
     }
 }

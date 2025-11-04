@@ -1,8 +1,11 @@
 package dataaccess;
 
+import model.GameData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+
+import static java.sql.Types.NULL;
 
 public class MySqlDatabaseHandler {
 
@@ -14,11 +17,17 @@ public class MySqlDatabaseHandler {
         return true;
     }
 
-    void executeQuery(String statement, Object... params) throws DataAccessException {
+    void executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-
-                ps.executeQuery();
+                for (int i = 0; i < params.length; i++) {
+                    Object param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i+1, p);
+                    else if (param instanceof GameData p) ps.setString(i+1, p.toString());
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
 
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) {
@@ -37,7 +46,6 @@ public class MySqlDatabaseHandler {
         `username` varchar(256) NOT NULL,
         `password` varchar(256) NOT NULL,
         `email` varchar(256) NOT NULL,
-        `json` TEXT DEFAULT NULL,
         PRIMARY KEY(`username`),
         INDEX(username)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -47,18 +55,17 @@ public class MySqlDatabaseHandler {
     CREATE TABLE IF NOT EXISTS auths (
         `username` varchar(256) NOT NULL,
         `authToken` varchar(256) NOT NULL,
-        `json` TEXT DEFAULT NULL,
-        PRIMARY KEY(`username`),
-        INDEX(username)
+        PRIMARY KEY(`authToken`),
+        INDEX(`authToken`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     """,
 
             """
     CREATE TABLE IF NOT EXISTS games (
         `gameID` int NOT NULL,
-        `whiteUsername` varchar(256) NOT NULL,
-        `blackUsername` varchar(256) NOT NULL,
-        `gameName` varchar(256) NOT NULL,
+        `whiteUsername` varchar(256),
+        `blackUsername` varchar(256),
+        `gameName` varchar(256),
         `game` TEXT NOT NULL,
         PRIMARY KEY(`gameID`),
         INDEX(`gameID`)
@@ -67,15 +74,17 @@ public class MySqlDatabaseHandler {
     };
 
     void configureDatabase() throws DataAccessException {
+
         DatabaseManager.createDatabase();
+
         try (Connection conn = DatabaseManager.getConnection()) {
             for (String statement : createStatements) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeQuery();
+                    preparedStatement.executeUpdate();
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Hi error is here Unable to configure database: %s", ex.getMessage()));
         }
     }
 

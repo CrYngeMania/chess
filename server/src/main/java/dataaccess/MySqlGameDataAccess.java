@@ -19,7 +19,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         var serialiser = new Gson();
         String jsonGame = serialiser.toJson(game.game());
-        handler.executeQuery(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), jsonGame);
+        handler.executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), jsonGame);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setObject(0, gameID);
+                ps.setObject(1, gameID);
                 try (ResultSet result = ps.executeQuery()) {
                     if (result.next()) {
                         return readGame(result);
@@ -46,7 +46,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
             int gameID = result.getInt("gameID");
             String whiteUsername = result.getString("whiteUsername");
             String blackUsername = result.getString("blackUsername");
-            String gameName = result.getString("whiteUsername");
+            String gameName = result.getString("gameName");
             String jsonGame = result.getString("game");
             ChessGame game = serialiser.fromJson(jsonGame, ChessGame.class);
             return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
@@ -79,12 +79,12 @@ public class MySqlGameDataAccess implements GameDataAccess{
         var statement = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
         var serialiser = new Gson();
         String jsonGame = serialiser.toJson(newGame.game());
-        handler.executeQuery(statement, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), jsonGame, newGame.gameID());
+        handler.executeUpdate(statement, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(), jsonGame, newGame.gameID());
     }
 
     @Override
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE games";
-        handler.executeQuery(statement);
+        handler.executeUpdate(statement);
     }
 }
