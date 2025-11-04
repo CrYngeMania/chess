@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 
 public interface DataAccess {
-    void clear();
+    void clear() throws DataAccessException;
     void saveUser(UserData user) throws DataAccessException;
-    UserData getUser(String username);
+    UserData getUser(String username) throws DataAccessException;
 }

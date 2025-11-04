@@ -5,8 +5,8 @@ import model.AuthData;
 import java.util.HashMap;
 
 public interface AuthDataAccess {
-    AuthData getAuth(String token);
-    void deleteAuth(AuthData auth);
-    void saveAuth(AuthData auth);
-    void clear();
+    AuthData getAuth(String token) throws DataAccessException;
+    void deleteAuth(AuthData auth) throws DataAccessException;
+    void saveAuth(AuthData auth) throws DataAccessException;
+    void clear() throws DataAccessException;
 }

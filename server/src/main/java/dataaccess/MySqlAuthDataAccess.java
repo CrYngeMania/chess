@@ -14,7 +14,7 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
     @Override
     public AuthData getAuth(String token) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, authToken FROM users WHERE authToken=?";
+            var statement = "SELECT username, authToken FROM auths WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setObject(1, token);
                 try (ResultSet result = ps.executeQuery()) {
@@ -24,8 +24,9 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
                 }
             }
         }catch (SQLException e) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
+            throw new DataAccessException("Error: Database error", e);
         }
+        return null;
     }
 
     private AuthData readAuth(ResultSet result) throws SQLException {

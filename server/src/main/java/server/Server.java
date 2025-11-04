@@ -11,17 +11,14 @@ import service.UserService;
 public class Server {
 
     private final Javalin server;
-    private UserService userService;
-    private GameService gameService;
-    private DataAccess dataAccess;
-    private GameDataAccess gameDataAccess;
-    private AuthDataAccess authDataAccess;
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
 
-        dataAccess = new MemoryDataAccess();
-        gameDataAccess = new MemoryGameDataAccess();
-        authDataAccess = new MemoryAuthDataAccess();
+        DataAccess dataAccess = new MemoryDataAccess();
+        GameDataAccess gameDataAccess = new MemoryGameDataAccess();
+        AuthDataAccess authDataAccess = new MemoryAuthDataAccess();
 
         userService = new UserService(dataAccess, gameDataAccess, authDataAccess);
         gameService = new GameService(gameDataAccess, authDataAccess);

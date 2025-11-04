@@ -42,6 +42,7 @@ class MySqlUserDataAccess implements DataAccess {
         }catch (SQLException e) {
             throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
         }
+        return null;
     }
 
     private UserData readUser(ResultSet result) throws SQLException{

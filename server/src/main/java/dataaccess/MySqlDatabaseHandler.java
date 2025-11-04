@@ -14,7 +14,7 @@ public class MySqlDatabaseHandler {
         return true;
     }
 
-    int executeQuery(String statement, Object... params) throws DataAccessException {
+    void executeQuery(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -22,10 +22,9 @@ public class MySqlDatabaseHandler {
 
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    rs.getInt(1);
                 }
 
-                return 0;
             }
         } catch (SQLException | DataAccessException ex){
             throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to update database.");
