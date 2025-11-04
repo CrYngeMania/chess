@@ -35,4 +35,14 @@ public class MemoryDataAccess implements DataAccess {
         return users.get(username);
     }
 
+    @Override
+    public boolean verifyUser(String username, String providedPassword) throws DataAccessException {
+        UserData user = getUser(username);
+        if (user == null){
+            return false;
+        }
+        String checkPassword = user.password();
+        return providedPassword.equals(checkPassword);
+    }
+
 }

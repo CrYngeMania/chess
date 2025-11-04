@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,6 +49,14 @@ public class MySqlUserDataAccess implements DataAccess {
         String password = result.getString("password");
         String email = result.getString("email");
         return new UserData(username, password, email);
+    }
+
+    public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
+        UserData user = getUser(username);
+        if (user == null) return false;
+
+        String hashedPassword = user.password();
+        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
     public void configureDatabase() throws DataAccessException {

@@ -13,10 +13,6 @@ public class MySqlDatabaseHandler {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    boolean verifyUser(String username, String clearTextPassword, String hashed) {
-        return true;
-    }
-
     void executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
