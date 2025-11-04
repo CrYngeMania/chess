@@ -4,19 +4,16 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.MySqlGameDataAccess;
 import dataaccess.MySqlUserDataAccess;
-import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLGameServiceTests {
 
-    private MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
-    private MySqlGameDataAccess gameAccess = new MySqlGameDataAccess();
+    private final MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
+    private final MySqlGameDataAccess gameAccess = new MySqlGameDataAccess();
 
     @BeforeEach
     void setup() throws Exception {

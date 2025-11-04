@@ -1,19 +1,15 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
 import dataaccess.MySqlUserDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLUserServiceTests {
 
-    private MySqlUserDataAccess access = new MySqlUserDataAccess();
+    private final MySqlUserDataAccess access = new MySqlUserDataAccess();
 
     @BeforeEach
     void setup() throws Exception {
@@ -56,7 +52,7 @@ public class SQLUserServiceTests {
     }
 
     @Test
-    public void saveUserFailNoUsername() throws DataAccessException {
+    public void saveUserFailNoUsername() {
         UserData user = new UserData(null, "dippledop", "mail");
         assertThrows(DataAccessException.class, () -> access.saveUser(user));
     }

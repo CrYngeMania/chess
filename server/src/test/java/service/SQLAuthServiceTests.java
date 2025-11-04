@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLAuthServiceTests {
 
-    private MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
-    private MySqlAuthDataAccess authAccess = new MySqlAuthDataAccess();
+    private final MySqlUserDataAccess userAccess = new MySqlUserDataAccess();
+    private final MySqlAuthDataAccess authAccess = new MySqlAuthDataAccess();
 
     @BeforeEach
     void setup() throws Exception {
@@ -33,13 +33,13 @@ public class SQLAuthServiceTests {
     }
 
     @Test
-    void saveAuthFailNothing() throws DataAccessException {
+    void saveAuthFailNothing() {
         AuthData auth = new AuthData(null, null);
         assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
     }
 
     @Test
-    void saveAuthFailNoToken() throws DataAccessException {
+    void saveAuthFailNoToken() {
         AuthData auth = new AuthData("howdy howdy howdy", null);
         assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
     }
