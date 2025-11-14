@@ -26,7 +26,7 @@ public class PreLoginClient {
             String line = scanner.nextLine();
 
             try {
-                result = line;
+                result = evaluate(line);
                 System.out.print(result);
             } catch (Throwable e){
                 var msg = e.toString();
