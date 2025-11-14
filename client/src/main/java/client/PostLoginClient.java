@@ -1,0 +1,142 @@
+package client;
+
+import dataaccess.DataAccessException;
+import datamodel.CreateGameRequest;
+import datamodel.JoinGameRequest;
+import datamodel.ListGameResult;
+import facade.ServerFacade;
+import model.GameData;
+
+import java.util.*;
+
+public class PostLoginClient {
+    private final ServerFacade server;
+    private List<Map<String, Object>> currentGames;
+
+    public PostLoginClient(ServerFacade server) {
+        this.server = server;
+        currentGames = new ArrayList<>();
+    }
+
+    public void run() {
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while(!result.equals("quit")) {
+            printPrompt();
+            String line = scanner.nextLine();
+
+            try {
+                result = evaluate(line);
+                System.out.print(result);
+            } catch (Throwable e){
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
+    }
+
+    public String evaluate(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "help" -> help();
+                case "create" -> create(params);
+                case "join" -> join(params);
+                case "quit" -> "";
+                default -> "That's not a valid command, you silly goober";
+            };
+
+        } catch (DataAccessException ex) {
+            return ex.getMessage();
+        }
+
+    }
+
+    private void printPrompt() {
+        System.out.print("\n" + "LOGGED_IN " + ">>> ");}
+
+    public String help() {
+        return """
+                    create <NAME> - creates a game with the given name
+                    list - shows all games
+                    join <ID> [WHITE|BLACK] - join a game
+                    observe <ID> - a game
+                    logout - logs out the user
+                    quit - quit the program
+                    help - shows possible commands""";
+    }
+
+    public String create(String... params) throws DataAccessException{
+        if (params.length >= 1) {
+            String gameName = params[0];
+
+            CreateGameRequest request = new CreateGameRequest(gameName);
+            server.createGame(request);
+            return String.format("Game %s created!", gameName);
+        }
+        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <NAME>");
+    }
+
+    public List<Map<String, Object>> listGames(ListGameResult games) {
+        List<Map<String, Object>> prettyList = new ArrayList<>();
+
+        for (int i = 0; i< games.games().size(); i++){
+            GameData game = games.games().get(i);
+            Map<String, Object> summary = new HashMap<>();
+
+            summary.put("number", i + 1);
+            summary.put("gameID", game.gameID());
+            summary.put("gameName", game.gameName());
+            summary.put("whiteUsername", game.whiteUsername());
+            summary.put("blackUsername", game.blackUsername());
+
+            prettyList.add(summary);
+
+        }
+        currentGames = prettyList;
+        return currentGames;
+    }
+
+    public String list() throws DataAccessException{
+        ListGameResult result = server.listGame();
+
+
+        StringBuilder builder = new StringBuilder();
+        var listToPrint = listGames(result);
+        for (var game: listToPrint){
+            builder.append(game.get("number"))
+                    .append(". ")
+                    .append(game.get("gameName"))
+                    .append(", White Player(")
+                    .append(game.get("whiteUsername"))
+                    .append("), Black Player(")
+                    .append(game.get("blackUsername"))
+                    .append(")\n");
+        }
+        return builder.toString();
+    }
+
+    public String join(String... params) throws DataAccessException{
+        if (params.length >= 2) {
+            int gameNumber;
+            String playerColor = params[1];
+                try{
+                    gameNumber = Integer.parseInt(params[0]);}
+                catch (Exception e){
+                    throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need the number of the game, silly :)");
+                }
+                if (currentGames == null || gameNumber < 1 || gameNumber > currentGames.size()){
+                    throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need a valid game number, player ;)");
+                }
+                var wantedGame = currentGames.get(gameNumber - 1);
+                int gameID = (Integer) wantedGame.get("gameID");
+                server.joinGame(new JoinGameRequest(playerColor, gameID));
+                System.out.print("You're in!");
+        }
+        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");
+    }
+
+}

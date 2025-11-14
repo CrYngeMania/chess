@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 public class PreLoginClient {
     private final ServerFacade server;
-    boolean loggedIn = false;
 
     public PreLoginClient(String url) {
         server = new ServerFacade(url);
@@ -18,9 +17,9 @@ public class PreLoginClient {
 
 
     public void run() {
-        System.out.println("Welcome to 240 Chess! Type help to get started :D\n");
+        System.out.println("Welcome to 240 Chess! Type help to get started :D");
         Scanner scanner = new Scanner(System.in);
-        var result = "";
+        String result = "";
         while(!result.equals("quit")) {
             printPrompt();
             String line = scanner.nextLine();
@@ -46,6 +45,7 @@ public class PreLoginClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "quit" -> "quit";
+                case "delete" -> delete();
                 default -> "That's not a valid command, you silly goober";
             };
 
@@ -54,46 +54,54 @@ public class PreLoginClient {
         }
 
     }
+    public String delete() throws DataAccessException {
+        server.delete();
+        return "deleted";
+    }
 
     private void printPrompt() {
-        System.out.print("\n" + "LOGGED_OUT" + ">>>");}
+        System.out.print("\n" + "LOGGED_OUT " + ">>> ");}
 
     public String help() {
             return """
                     register <USERNAME> <PASSWORD> <EMAIL> - create a new account
-                    
                     login <USERNAME> <PASSWORD> - log in to play chess
-                    
                     quit - exit
-                    
                     help - shows possible commands""";
 
     }
 
     public String register(String... params) throws DataAccessException {
         if (params.length >= 3) {
-            loggedIn = true;
             String username = params[0];
             String password = params[1];
             String email = params[2];
 
             RegistrationRequest request = new RegistrationRequest(username, password, email);
             server.register(request);
-            return String.format("You're registered as %s! Welcome to the game :)", username);
+            System.out.printf("You're registered as %s! Welcome to the game :)", username);
+            runPost();
+            return "You're logged out!";
 
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
     }
 
+    private void runPost() {
+        PostLoginClient client = new PostLoginClient(server);
+        client.run();
+    }
+
     public String login(String... params) throws DataAccessException {
         if (params.length >= 2) {
-            loggedIn = true;
             String username = params[0];
             String password = params[1];
 
             LoginRequest request = new LoginRequest(username, password);
             server.login(request);
-            return String.format("Welcome back, %s! You're logged in!", username);
+            System.out.printf("Welcome back, %s! You're logged in!", username);
+            runPost();
+            return "You're logged out!";
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD>");
     }

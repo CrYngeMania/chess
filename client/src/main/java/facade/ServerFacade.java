@@ -14,6 +14,7 @@ public class ServerFacade {
     private final String serverUrl;
     private String authToken;
 
+    public String getServerUrl() {return serverUrl;}
 
     public ServerFacade(String url) {
         serverUrl = url;
