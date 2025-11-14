@@ -99,5 +99,25 @@ public class ServerFacadeTests {
         assertThrows(DataAccessException.class, () -> facade.createGame(request2));
     }
 
+    @Test
+    public void testListGamePass() throws DataAccessException{
+        CreateGameRequest request = new CreateGameRequest("creative name");
+        facade.createGame(request);
 
+        assertNotNull(facade.listGame());
+
+        CreateGameRequest request2 = new CreateGameRequest("another creative name");
+        facade.createGame(request2);
+        CreateGameRequest request3 = new CreateGameRequest("im so creative");
+        facade.createGame(request3);
+
+        assertNotNull(facade.listGame());
+    }
+
+    @Test
+    public void testListGameFail() throws DataAccessException{
+        facade.delete();
+
+        assertThrows(DataAccessException.class, () -> facade.listGame());
+    }
 }
