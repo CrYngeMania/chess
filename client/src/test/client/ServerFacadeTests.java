@@ -52,7 +52,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testLoginPass()throws DataAccessException {
+    public void testLoginPass() throws DataAccessException {
         LoginRequest request = new LoginRequest("dippleDop", "impy");
         LoginResult result = facade.login(request);
 
@@ -81,7 +81,23 @@ public class ServerFacadeTests {
         assertThrows(DataAccessException.class, () -> facade.logout());
     }
 
+    @Test
+    public void testCreateGamePass() throws DataAccessException {
+        CreateGameRequest request = new CreateGameRequest("creative name");
+        CreateGameResult result = facade.createGame(request);
 
+        assertNotNull(result.gameID());
+    }
+
+    @Test
+    public void testCreateGameFail() throws DataAccessException{
+        CreateGameRequest request = new CreateGameRequest(null);
+        assertThrows(DataAccessException.class, () -> facade.createGame(request));
+
+        facade.delete();
+        CreateGameRequest request2 = new CreateGameRequest("creative name");
+        assertThrows(DataAccessException.class, () -> facade.createGame(request2));
+    }
 
 
 }
