@@ -120,4 +120,38 @@ public class ServerFacadeTests {
 
         assertThrows(DataAccessException.class, () -> facade.listGame());
     }
+
+    @Test
+    public void testJoinGamePass() throws DataAccessException {
+        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
+        CreateGameResult gameResult = facade.createGame(gameRequest);
+        JoinGameRequest request = new JoinGameRequest("WHITE", gameResult.gameID());
+
+        assertDoesNotThrow(() -> facade.joinGame(request));
+    }
+
+    @Test
+    public void testJoinGameFail() throws DataAccessException {
+        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
+        CreateGameResult gameResult = facade.createGame(gameRequest);
+        JoinGameRequest request = new JoinGameRequest("WHITE", gameResult.gameID());
+        facade.joinGame(request);
+        JoinGameRequest request2 = new JoinGameRequest("WHITE", gameResult.gameID());
+        assertThrows(DataAccessException.class, () -> facade.joinGame(request2));
+    }
+
+    @Test
+    public void testDeletePass() throws DataAccessException {
+        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
+        facade.createGame(gameRequest);
+
+        CreateGameRequest request2 = new CreateGameRequest("another creative name");
+        facade.createGame(request2);
+        CreateGameRequest request3 = new CreateGameRequest("im so creative");
+        facade.createGame(request3);
+
+        facade.delete();
+
+        assertThrows(DataAccessException.class, () -> facade.login(new LoginRequest("dippleDop", "impy")));
+    }
 }
