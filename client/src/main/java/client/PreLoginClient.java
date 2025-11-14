@@ -1,9 +1,21 @@
 package client;
 
+import dataaccess.DataAccessException;
+import datamodel.LoginRequest;
+import datamodel.RegistrationRequest;
+import facade.ServerFacade;
+
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class PreLoginClient {
+    private final ServerFacade server;
     boolean loggedIn = false;
+
+    public PreLoginClient(String url) {
+        server = new ServerFacade(url);
+    }
+
 
     public void run() {
         System.out.println("Welcome to 240 Chess! Type help to get started :D\n");
@@ -24,30 +36,66 @@ public class PreLoginClient {
         System.out.println();
     }
 
+    public String evaluate(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "help" -> help();
+                case "register" -> register(params);
+                case "login" -> login(params);
+                case "quit" -> "quit";
+                default -> "That's not a valid command, you silly goober";
+            };
+
+        } catch (DataAccessException ex) {
+            return ex.getMessage();
+        }
+
+    }
+
     private void printPrompt() {
+        System.out.print("\n" + "LOGGED_OUT" + ">>>");}
 
-        System.out.print("\n" + "LOGGED_IN" + ">>>");}
-
-    public void help() {
-            System.out.println("""
+    public String help() {
+            return """
                     register <USERNAME> <PASSWORD> <EMAIL> - create a new account
                     
                     login <USERNAME> <PASSWORD> - log in to play chess
                     
                     quit - exit
                     
-                    help - shows possible commands""");
+                    help - shows possible commands""";
 
     }
 
-    public String register(String... params) throws Exception {
+    public String register(String... params) throws DataAccessException {
         if (params.length >= 3) {
             loggedIn = true;
             String username = params[0];
             String password = params[1];
             String email = params[2];
 
+            RegistrationRequest request = new RegistrationRequest(username, password, email);
+            server.register(request);
+            return String.format("You're registered as %s! Welcome to the game :)", username);
+
         }
-        return "";
+        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
     }
+
+    public String login(String... params) throws DataAccessException {
+        if (params.length >= 2) {
+            loggedIn = true;
+            String username = params[0];
+            String password = params[1];
+
+            LoginRequest request = new LoginRequest(username, password);
+            server.login(request);
+            return String.format("Welcome back, %s! You're logged in!", username);
+        }
+        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD>");
+    }
+
 }
