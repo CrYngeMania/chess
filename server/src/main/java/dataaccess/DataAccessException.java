@@ -12,8 +12,24 @@ public class DataAccessException extends Exception{
 
     public static DataAccessException fromJson(String body) {
         var map = new Gson().fromJson(body, HashMap.class);
-        var status = Code.valueOf(map.get("status").toString());
-        String message = map.get("message").toString();
+
+        Object statusObj = map.get("status");
+        Object messageObj = map.get("message");
+        Code status = null;
+        String message = "Unknown error";
+
+        if (statusObj != null) {
+            try {
+                status = Code.valueOf(map.get("status").toString());
+            } catch (IllegalArgumentException ignored) {
+                status = Code.ServerError;
+            }
+        }
+        
+        if (messageObj != null){
+            message = map.get("message").toString();
+        }
+        
         return new DataAccessException(status, message);
     }
 

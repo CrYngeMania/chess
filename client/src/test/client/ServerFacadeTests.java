@@ -1,0 +1,74 @@
+package client;
+
+import dataaccess.DataAccessException;
+import datamodel.LoginRequest;
+import datamodel.LoginResult;
+import datamodel.RegistrationRequest;
+import datamodel.RegistrationResult;
+import facade.ServerFacade;
+import org.junit.jupiter.api.*;
+import server.Server;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+public class ServerFacadeTests {
+
+    private static Server server;
+    static String baseUrl;
+
+    private ServerFacade facade = new ServerFacade(baseUrl);
+
+    @BeforeAll
+    public static void init() {
+        server = new Server();
+        var port = server.run(0);
+        baseUrl = "http://localhost:" + port;
+        System.out.println("Started test HTTP server on " + port);
+    }
+
+    @BeforeEach
+    void setup() throws Exception {
+        facade.delete();
+        facade.register(new RegistrationRequest("dippleDop", "impy", "sv"));
+    }
+
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
+
+    @Test
+    public void testRegisterPass() throws DataAccessException {
+        RegistrationRequest request = new RegistrationRequest("Jackaboy", "wapoosh", "ksdjhf");
+        RegistrationResult result = facade.register(request);
+
+        assertEquals(result.username(), request.username());
+        assertNotNull(result.authToken());
+    }
+
+    @Test
+    public void testRegisterFail() throws DataAccessException {
+        RegistrationRequest request = new RegistrationRequest(null, "wapoosh", "ksdjhf");
+
+        assertThrows(DataAccessException.class, () -> facade.register(request));
+    }
+
+    @Test
+    public void testLoginPass()throws DataAccessException {
+        LoginRequest request = new LoginRequest("dippleDop", "impy");
+        LoginResult result = facade.login(request);
+
+        assertEquals(result.username(), request.username());
+        assertNotNull(result.authToken());
+    }
+
+    @Test
+    public void testLoginFail() throws DataAccessException {
+        LoginRequest request = new LoginRequest("illFail", "watch me fail");
+        assertThrows(DataAccessException.class, () -> facade.login(request));
+    }
+
+
+
+}

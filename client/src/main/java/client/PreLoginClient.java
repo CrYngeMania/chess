@@ -14,7 +14,7 @@ public class PreLoginClient {
             String line = scanner.nextLine();
 
             try {
-                result = evaluate(line);
+                result = line;
                 System.out.print(result);
             } catch (Throwable e){
                 var msg = e.toString();
@@ -47,8 +47,7 @@ public class PreLoginClient {
             String password = params[1];
             String email = params[2];
 
-
-
         }
+        return "";
     }
 }
