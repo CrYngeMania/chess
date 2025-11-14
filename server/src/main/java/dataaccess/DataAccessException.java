@@ -1,11 +1,29 @@
 package dataaccess;
 
+import com.google.gson.Gson;
+
 import java.sql.SQLException;
+import java.util.HashMap;
 
 /**
  * Indicates there was an error connecting to the database
  */
 public class DataAccessException extends Exception{
+
+    public static DataAccessException fromJson(String body) {
+        var map = new Gson().fromJson(body, HashMap.class);
+        var status = Code.valueOf(map.get("status").toString());
+        String message = map.get("message").toString();
+        return new DataAccessException(status, message);
+    }
+
+    public static Code fromHttpStatusCode(int status) {
+        return switch (status) {
+            case 500 -> Code.ServerError;
+            case 400 -> Code.ClientError;
+            default -> throw new IllegalArgumentException("Unknown HTTP status code: " + status);
+        };
+    }
 
     public enum Code {
         ServerError,
