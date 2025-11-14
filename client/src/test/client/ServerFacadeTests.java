@@ -1,10 +1,7 @@
 package client;
 
 import dataaccess.DataAccessException;
-import datamodel.LoginRequest;
-import datamodel.LoginResult;
-import datamodel.RegistrationRequest;
-import datamodel.RegistrationResult;
+import datamodel.*;
 import facade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -68,6 +65,22 @@ public class ServerFacadeTests {
         LoginRequest request = new LoginRequest("illFail", "watch me fail");
         assertThrows(DataAccessException.class, () -> facade.login(request));
     }
+
+    @Test
+    public void testLogoutSuccess() throws DataAccessException {
+        LoginRequest request = new LoginRequest("dippleDop", "impy");
+        facade.login(request);
+
+        LogoutResult result = facade.logout();
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testLogoutFail() throws DataAccessException {
+        facade.delete();
+        assertThrows(DataAccessException.class, () -> facade.logout());
+    }
+
 
 
 

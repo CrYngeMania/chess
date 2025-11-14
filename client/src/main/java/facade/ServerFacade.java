@@ -12,6 +12,7 @@ import java.net.http.HttpResponse;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
+    private String authToken;
 
 
     public ServerFacade(String url) {
@@ -21,13 +22,19 @@ public class ServerFacade {
     public RegistrationResult register(RegistrationRequest request) throws DataAccessException {
         var httpRequest = buildRequest("POST", "/user", request);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, RegistrationResult.class);
+        RegistrationResult reg =  handleResponse(response, RegistrationResult.class);
+        assert reg != null;
+        authToken = reg.authToken();
+        return reg;
     }
 
     public LoginResult login(LoginRequest request) throws DataAccessException {
         var httpRequest = buildRequest("POST", "/session", request);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, LoginResult.class);
+        LoginResult login =  handleResponse(response, LoginResult.class);
+        assert login != null;
+        authToken = login.authToken();
+        return login;
     }
 
     public LogoutResult logout() throws DataAccessException {
@@ -66,6 +73,9 @@ public class ServerFacade {
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.setHeader("Authorization", authToken);
         }
         return request.build();
     }
