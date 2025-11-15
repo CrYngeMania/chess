@@ -2,7 +2,6 @@ package client;
 
 import chess.ChessGame;
 import facade.ServerFacade;
-import ui.EscapeSequences;
 
 import java.util.Objects;
 
@@ -45,7 +44,7 @@ public class GameClient {
             cols = new int[]{8,7,6,5,4,3,2,1};
         }
 
-        for (int row = start; row <= end; row+=step){
+        for (int row = start; row != end + step; row+=step){
             System.out.print(row + " ");
 
             for (int col:cols) {

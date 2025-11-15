@@ -138,7 +138,7 @@ public class PostLoginClient {
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
                 server.joinGame(new JoinGameRequest(playerColor, gameID));
-                runGame(playerColor, (ChessGame) wantedGame.get("game"));
+                //runGame(playerColor, (ChessGame) wantedGame.get("game"));
                 return("");
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");
@@ -160,7 +160,7 @@ public class PostLoginClient {
                 throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Make sure you list the games first!");
             }
             var wantedGame = currentGames.get(gameNumber - 1);
-            runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
+            //runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
             return "";
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID>");
