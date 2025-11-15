@@ -6,6 +6,9 @@ import ui.EscapeSequences;
 
 import java.util.Objects;
 
+import static ui.EscapeSequences.SET_BG_COLOR_DARK_GREY;
+import static ui.EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+
 public class GameClient {
     private final ServerFacade server;
     String playerType;
@@ -17,13 +20,11 @@ public class GameClient {
         this.game = game;
     }
 
+
+
+
     public void run() {
-        if (Objects.equals(playerType, "BLACK")) {
-            System.out.print("im black");
-        }
-        else {
-            System.out.print("i can see white");
-        }
+            printBoard();
     }
 
     public void printBoard(){
@@ -35,6 +36,32 @@ public class GameClient {
             end = 8;
             step = 1;
         }
+
+        int[] cols;
+        if(isWhite){
+            cols = new int[]{1,2,3,4,5,6,7,8};
+        }
+        else{
+            cols = new int[]{8,7,6,5,4,3,2,1};
+        }
+
+        for (int row = start; row <= end; row+=step){
+            System.out.print(row + " ");
+
+            for (int col:cols) {
+                boolean isLight = ((row + col) % 2 != 0);
+
+                if (isLight) {
+                    System.out.print(SET_BG_COLOR_LIGHT_GREY);
+                }
+                else{
+                    System.out.print(SET_BG_COLOR_DARK_GREY);
+                }
+            }
+            System.out.println(" " + row);
+        }
+
+
 
 
 
