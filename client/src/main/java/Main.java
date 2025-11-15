@@ -5,9 +5,10 @@ import server.Server;
 import client.PreLoginClient;
 
 public class Main {
+    static String serverUrl = "http://localhost:8080";
+    static PreLoginClient client = new PreLoginClient(serverUrl);
 
     public static void main(String[] args) {
-        String serverUrl = "http://localhost:8080";
-        new PreLoginClient(serverUrl).run();
+        client.run();
     }
 }
