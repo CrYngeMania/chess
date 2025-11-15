@@ -1,9 +1,11 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import datamodel.CreateGameRequest;
 import datamodel.JoinGameRequest;
 import datamodel.ListGameResult;
+import datamodel.LogoutResult;
 import facade.ServerFacade;
 import model.GameData;
 
@@ -21,7 +23,7 @@ public class PostLoginClient {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while(!result.equals("quit")) {
+        while(!result.equals("Logging out!")) {
             printPrompt();
             String line = scanner.nextLine();
 
@@ -45,7 +47,9 @@ public class PostLoginClient {
                 case "help" -> help();
                 case "create" -> create(params);
                 case "join" -> join(params);
-                case "quit" -> "";
+                case "list" -> list();
+                case "observe" -> observe(params);
+                case "logout" -> logout();
                 default -> "That's not a valid command, you silly goober";
             };
 
@@ -65,7 +69,6 @@ public class PostLoginClient {
                     join <ID> [WHITE|BLACK] - join a game
                     observe <ID> - a game
                     logout - logs out the user
-                    quit - quit the program
                     help - shows possible commands""";
     }
 
@@ -92,6 +95,7 @@ public class PostLoginClient {
             summary.put("gameName", game.gameName());
             summary.put("whiteUsername", game.whiteUsername());
             summary.put("blackUsername", game.blackUsername());
+            summary.put("game", game.game());
 
             prettyList.add(summary);
 
@@ -122,7 +126,7 @@ public class PostLoginClient {
     public String join(String... params) throws DataAccessException{
         if (params.length >= 2) {
             int gameNumber;
-            String playerColor = params[1];
+            String playerColor = params[1].toUpperCase();
                 try{
                     gameNumber = Integer.parseInt(params[0]);}
                 catch (Exception e){
@@ -134,9 +138,42 @@ public class PostLoginClient {
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
                 server.joinGame(new JoinGameRequest(playerColor, gameID));
-                System.out.print("You're in!");
+                runGame(playerColor, (ChessGame) wantedGame.get("game"));
+                return("");
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");
+    }
+
+    public String observe(String... params) throws DataAccessException{
+        if (params.length >= 1) {
+            int gameNumber;
+
+            try{
+                gameNumber = Integer.parseInt(params[0]);}
+            catch (Exception e){
+                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need the number of the game, silly :)");
+            }
+            if ( gameNumber < 1|| (gameNumber > currentGames.size() && currentGames.size() > 1)){
+                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need a valid game number, player ;)");
+            }
+            if (currentGames.isEmpty()){
+                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Make sure you list the games first!");
+            }
+            var wantedGame = currentGames.get(gameNumber - 1);
+            runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
+            return "";
+        }
+        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID>");
+    }
+
+    private void runGame(String playerType, ChessGame game) {
+        GameClient client = new GameClient(server, playerType, game);
+        client.run();
+    }
+
+    public String logout() throws DataAccessException{
+        server.logout();
+        return "Logging out!";
     }
 
 }

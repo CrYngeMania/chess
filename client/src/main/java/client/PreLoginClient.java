@@ -26,13 +26,16 @@ public class PreLoginClient {
 
             try {
                 result = evaluate(line);
-                System.out.print(result);
+                if(!result.equals("quit")){
+                    System.out.print(result);
+                }
             } catch (Throwable e){
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
         System.out.println();
+        System.exit(200);
     }
 
     public String evaluate(String input) {
@@ -81,7 +84,7 @@ public class PreLoginClient {
             server.register(request);
             System.out.printf("You're registered as %s! Welcome to the game :)", username);
             runPost();
-            return "You're logged out!";
+            return "";
 
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
@@ -101,7 +104,7 @@ public class PreLoginClient {
             server.login(request);
             System.out.printf("Welcome back, %s! You're logged in!", username);
             runPost();
-            return "You're logged out!";
+            return "";
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD>");
     }
