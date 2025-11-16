@@ -1,8 +1,6 @@
 package client;
 
 import dataaccess.DataAccessException;
-import datamodel.LoginRequest;
-import datamodel.RegistrationRequest;
 import facade.ServerFacade;
 
 import java.util.Arrays;

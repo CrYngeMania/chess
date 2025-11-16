@@ -3,7 +3,6 @@ package facade;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dataaccess.DataAccessException;
-import datamodel.*;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -16,8 +15,6 @@ public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
     private String authToken;
-
-    public String getServerUrl() {return serverUrl;}
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -63,6 +60,7 @@ public class ServerFacade {
         var httpRequest = buildRequest("PUT", "/game", request);
         var response = sendRequest(httpRequest);
         HashMap<String, Object> result = handleResponse(response);
+        assert result != null;
         if (result.containsKey("gameID") && result.get("gameID") instanceof Double d){
             result.put("gameID", d.intValue());
         }
@@ -75,6 +73,7 @@ public class ServerFacade {
         var httpRequest = buildRequest("POST", "/game", request);
         var response = sendRequest(httpRequest);
         HashMap<String, Object> result = handleResponse(response);
+        assert result != null;
         if (result.containsKey("gameID") && result.get("gameID") instanceof Double d){
             result.put("gameID", d.intValue());
         }

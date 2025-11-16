@@ -1,7 +1,6 @@
 package client;
 
 import dataaccess.DataAccessException;
-import datamodel.*;
 import facade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
