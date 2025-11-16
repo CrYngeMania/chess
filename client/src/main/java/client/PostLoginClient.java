@@ -1,7 +1,7 @@
 package client;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
+import exception.ResponseException;
 import facade.ServerFacade;
 import model.GameData;
 
@@ -49,7 +49,7 @@ public class PostLoginClient {
                 default -> "That's not a valid command, you silly goober";
             };
 
-        } catch (DataAccessException ex) {
+        } catch (ResponseException ex) {
             return ex.getMessage();
         }
 
@@ -68,14 +68,14 @@ public class PostLoginClient {
                     help - shows possible commands""";
     }
 
-    public String create(String... params) throws DataAccessException{
+    public String create(String... params) throws ResponseException{
         if (params.length >= 1) {
             String gameName = params[0];
 
             server.createGame(gameName);
             return String.format("Game %s created!", gameName);
         }
-        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <NAME>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <NAME>");
     }
 
     public List<Map<String, Object>> listGames(HashMap<String, Object> gameResponse) {
@@ -101,7 +101,7 @@ public class PostLoginClient {
         return currentGames;
     }
 
-    public String list() throws DataAccessException{
+    public String list() throws ResponseException{
         HashMap<String, Object> result = server.listGame();
 
 
@@ -120,17 +120,17 @@ public class PostLoginClient {
         return builder.toString();
     }
 
-    public String join(String... params) throws DataAccessException{
+    public String join(String... params) throws ResponseException{
         if (params.length >= 2) {
             int gameNumber;
             String playerColor = params[1].toUpperCase();
                 try{
                     gameNumber = Integer.parseInt(params[0]);}
                 catch (Exception e){
-                    throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need the number of the game, silly :)");
+                    throw new ResponseException(ResponseException.Code.ClientError, "Error: I need the number of the game, silly :)");
                 }
                 if (currentGames == null || gameNumber < 1 || gameNumber > currentGames.size()){
-                    throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need a valid game number, player ;)");
+                    throw new ResponseException(ResponseException.Code.ClientError, "Error: I need a valid game number, player ;)");
                 }
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
@@ -138,29 +138,29 @@ public class PostLoginClient {
                 //runGame(playerColor, (ChessGame) wantedGame.get("game"));
                 return("");
         }
-        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");
+        throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");
     }
 
-    public String observe(String... params) throws DataAccessException{
+    public String observe(String... params) throws ResponseException{
         if (params.length >= 1) {
             int gameNumber;
 
             try{
                 gameNumber = Integer.parseInt(params[0]);}
             catch (Exception e){
-                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need the number of the game, silly :)");
+                throw new ResponseException(ResponseException.Code.ClientError, "Error: I need the number of the game, silly :)");
             }
             if ( gameNumber < 1|| (gameNumber > currentGames.size() && currentGames.size() > 1)){
-                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: I need a valid game number, player ;)");
+                throw new ResponseException(ResponseException.Code.ClientError, "Error: I need a valid game number, player ;)");
             }
             if (currentGames.isEmpty()){
-                throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Make sure you list the games first!");
+                throw new ResponseException(ResponseException.Code.ClientError, "Error: Make sure you list the games first!");
             }
             var wantedGame = currentGames.get(gameNumber - 1);
             //runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
             return "";
         }
-        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <ID>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <ID>");
     }
 
     private void runGame(String playerType, ChessGame game) {
@@ -168,7 +168,7 @@ public class PostLoginClient {
         client.run();
     }
 
-    public String logout() throws DataAccessException{
+    public String logout() throws ResponseException{
         server.logout();
         return "Logging out!";
     }

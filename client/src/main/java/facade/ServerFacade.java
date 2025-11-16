@@ -2,7 +2,7 @@ package facade;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import dataaccess.DataAccessException;
+import exception.ResponseException;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -20,7 +20,7 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public HashMap<String, Object> register(String username, String password, String email) throws DataAccessException {
+    public HashMap<String, Object> register(String username, String password, String email) throws ResponseException {
         HashMap<String, Object> request = new HashMap<>();
         request.put("username", username);
         request.put("password", password);
@@ -34,7 +34,7 @@ public class ServerFacade {
         return reg;
     }
 
-    public HashMap<String, Object> login(String username, String password) throws DataAccessException {
+    public HashMap<String, Object> login(String username, String password) throws ResponseException {
         HashMap<String, Object> request = new HashMap<>();
         request.put("username", username);
         request.put("password", password);
@@ -47,13 +47,13 @@ public class ServerFacade {
         return login;
     }
 
-    public HashMap<String, Object> logout() throws DataAccessException {
+    public HashMap<String, Object> logout() throws ResponseException {
         var httpRequest = buildRequest("DELETE", "/session",null);
         var response = sendRequest(httpRequest);
         return handleResponse(response);
     }
 
-    public HashMap<String, Object> joinGame(String playerColor, Integer gameID) throws DataAccessException {
+    public HashMap<String, Object> joinGame(String playerColor, Integer gameID) throws ResponseException {
         HashMap<String, Object> request = new HashMap<>();
         request.put("playerColor", playerColor);
         request.put("gameID", gameID);
@@ -67,7 +67,7 @@ public class ServerFacade {
         return result;
     }
 
-    public HashMap<String, Object> createGame(String gameName) throws DataAccessException {
+    public HashMap<String, Object> createGame(String gameName) throws ResponseException {
         HashMap<String, Object> request = new HashMap<>();
         request.put("gameName", gameName);
         var httpRequest = buildRequest("POST", "/game", request);
@@ -80,13 +80,13 @@ public class ServerFacade {
         return result;
     }
 
-    public HashMap<String, Object> listGame() throws DataAccessException {
+    public HashMap<String, Object> listGame() throws ResponseException {
         var httpRequest = buildRequest("GET", "/game", null);
         var response = sendRequest(httpRequest);
         return handleResponse(response);
     }
 
-    public void delete() throws DataAccessException {
+    public void delete() throws ResponseException {
         var httpRequest = buildRequest("DELETE", "/db", null);
         var response = sendRequest(httpRequest);
         handleResponse(response);
@@ -113,23 +113,23 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, ex.getMessage());
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response) throws DataAccessException {
+    private <T> T handleResponse(HttpResponse<String> response) throws ResponseException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw DataAccessException.fromJson(body);
+                throw ResponseException.fromJson(body);
             }
 
-            throw new DataAccessException(DataAccessException.fromHttpStatusCode(status), "other failure: " + status);
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
 
         if (response.body() != null) {

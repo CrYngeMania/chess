@@ -1,6 +1,6 @@
 package client;
 
-import dataaccess.DataAccessException;
+import exception.ResponseException;
 import facade.ServerFacade;
 
 import java.util.Arrays;
@@ -50,12 +50,12 @@ public class PreLoginClient {
                 default -> "That's not a valid command, you silly goober";
             };
 
-        } catch (DataAccessException ex) {
+        } catch (ResponseException ex) {
             return ex.getMessage();
         }
 
     }
-    public String delete() throws DataAccessException {
+    public String delete() throws ResponseException {
         server.delete();
         return "deleted";
     }
@@ -72,7 +72,7 @@ public class PreLoginClient {
 
     }
 
-    public String register(String... params) throws DataAccessException {
+    public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
             String username = params[0];
             String password = params[1];
@@ -84,7 +84,7 @@ public class PreLoginClient {
             return "";
 
         }
-        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD> <EMAIL>");
     }
 
     private void runPost() {
@@ -92,7 +92,7 @@ public class PreLoginClient {
         client.run();
     }
 
-    public String login(String... params) throws DataAccessException {
+    public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
             String username = params[0];
             String password = params[1];
@@ -102,7 +102,7 @@ public class PreLoginClient {
             runPost();
             return "";
         }
-        throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD>");
+        throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <USERNAME> <PASSWORD>");
     }
 
 }

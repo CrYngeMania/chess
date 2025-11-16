@@ -1,6 +1,6 @@
 package client;
 
-import dataaccess.DataAccessException;
+import exception.ResponseException;
 import facade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -37,7 +37,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testRegisterPass() throws DataAccessException {
+    public void testRegisterPass() throws ResponseException {
         HashMap<String, Object> result = facade.register("Jackaboy", "wapoosh", "ksdjhf");
 
         assertEquals("Jackaboy", result.get("username"));
@@ -45,12 +45,12 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testRegisterFail() throws DataAccessException {
-        assertThrows(DataAccessException.class, () -> facade.register(null, "wapoosh", "ksdjhf"));
+    public void testRegisterFail() throws ResponseException {
+        assertThrows(ResponseException.class, () -> facade.register(null, "wapoosh", "ksdjhf"));
     }
 
     @Test
-    public void testLoginPass() throws DataAccessException {
+    public void testLoginPass() throws ResponseException {
         HashMap<String, Object> result = facade.login("dippleDop", "impy");
 
         assertEquals("dippleDop", result.get("username"));
@@ -58,12 +58,12 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testLoginFail() throws DataAccessException {
-        assertThrows(DataAccessException.class, () -> facade.login("illFail", "watch me fail"));
+    public void testLoginFail() throws ResponseException {
+        assertThrows(ResponseException.class, () -> facade.login("illFail", "watch me fail"));
     }
 
     @Test
-    public void testLogoutSuccess() throws DataAccessException {
+    public void testLogoutSuccess() throws ResponseException {
         facade.login("dippleDop", "impy");
 
         HashMap<String, Object> result = facade.logout();
@@ -71,27 +71,27 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testLogoutFail() throws DataAccessException {
+    public void testLogoutFail() throws ResponseException {
         facade.delete();
-        assertThrows(DataAccessException.class, () -> facade.logout());
+        assertThrows(ResponseException.class, () -> facade.logout());
     }
 
     @Test
-    public void testCreateGamePass() throws DataAccessException {
+    public void testCreateGamePass() throws ResponseException {
         HashMap<String, Object> result = facade.createGame("request");
 
         assertNotNull(result.get("gameID"));
     }
 
     @Test
-    public void testCreateGameFail() throws DataAccessException{
-        assertThrows(DataAccessException.class, () -> facade.createGame(null));
+    public void testCreateGameFail() throws ResponseException{
+        assertThrows(ResponseException.class, () -> facade.createGame(null));
         facade.delete();
-        assertThrows(DataAccessException.class, () -> facade.createGame("creative name"));
+        assertThrows(ResponseException.class, () -> facade.createGame("creative name"));
     }
 
     @Test
-    public void testListGamePass() throws DataAccessException{
+    public void testListGamePass() throws ResponseException{
         facade.createGame("creative name");
 
         assertNotNull(facade.listGame());
@@ -103,27 +103,27 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void testListGameFail() throws DataAccessException{
+    public void testListGameFail() throws ResponseException{
         facade.delete();
 
-        assertThrows(DataAccessException.class, () -> facade.listGame());
+        assertThrows(ResponseException.class, () -> facade.listGame());
     }
 
     @Test
-    public void testJoinGamePass() throws DataAccessException {
+    public void testJoinGamePass() throws ResponseException {
         HashMap<String, Object> gameResult = facade.createGame("creative name");
         assertDoesNotThrow(() -> facade.joinGame("WHITE", (Integer) gameResult.get("gameID")));
     }
 
     @Test
-    public void testJoinGameFail() throws DataAccessException {
+    public void testJoinGameFail() throws ResponseException {
         HashMap<String, Object> gameResult = facade.createGame("creative name");
         facade.joinGame("WHITE", (Integer) gameResult.get("gameID"));
-        assertThrows(DataAccessException.class, () -> facade.joinGame("WHITE", (Integer) gameResult.get("gameID")));
+        assertThrows(ResponseException.class, () -> facade.joinGame("WHITE", (Integer) gameResult.get("gameID")));
     }
 
     @Test
-    public void testDeletePass() throws DataAccessException {
+    public void testDeletePass() throws ResponseException {
         facade.createGame("creative name");
 
         facade.createGame("another creative name");
@@ -131,6 +131,6 @@ public class ServerFacadeTests {
 
         facade.delete();
 
-        assertThrows(DataAccessException.class, () -> facade.login("dippleDop", "impy"));
+        assertThrows(ResponseException.class, () -> facade.login("dippleDop", "impy"));
     }
 }
