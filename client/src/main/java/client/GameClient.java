@@ -86,10 +86,6 @@ public class GameClient {
         out.println();
     }
 
-
-    private static void printPlayer(PrintStream out, ChessPiece.PieceType piece){
-    }
-
     public void printBoard(PrintStream out){
         drawHeaders(out);
         out.println();
