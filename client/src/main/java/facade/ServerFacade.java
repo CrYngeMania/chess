@@ -3,12 +3,16 @@ package facade;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
+import model.GameData;
+
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -82,7 +86,21 @@ public class ServerFacade {
     public HashMap<String, Object> listGame() throws ResponseException {
         var httpRequest = buildRequest("GET", "/game", null);
         var response = sendRequest(httpRequest);
-        return handleResponse(response);
+
+        HashMap<String, Object> result = handleResponse(response);
+
+        Object rawGames = result.get("games");
+        if (rawGames instanceof List<?> rawList) {
+            List<GameData> games = new ArrayList<>();
+            for (Object obj : rawList) {
+                // Convert each map to GameData
+                GameData game = new Gson().fromJson(new Gson().toJson(obj), GameData.class);
+                games.add(game);
+            }
+            result.put("games", games);  // replace the raw list with typed list
+        }
+
+        return result;
     }
 
     public void delete() throws ResponseException {
@@ -120,7 +138,7 @@ public class ServerFacade {
         }
     }
 
-    private HashMap<String, Object> handleResponse(HttpResponse<String> response) throws ResponseException {
+    private <T> T handleResponse(HttpResponse<String> response) throws ResponseException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
