@@ -1,9 +1,9 @@
 package service;
-import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDataAccess;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MemoryGameDataAccess;
 import datamodel.*;
+import exception.ResponseException;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,18 +21,18 @@ public class GameServiceTests {
 
     @BeforeEach
 
-    void clear() throws DataAccessException {
+    void clear() throws ResponseException {
         USER_SERVICE.delete(null);
     }
 
-    public void initRegister() throws DataAccessException {
+    public void initRegister() throws ResponseException {
         registrationResult = USER_SERVICE.register(user);
         existingAuth = registrationResult.authToken();
         createGame = GAME_SERVICE.createGame(createRequest, existingAuth);
     }
 
     @Test
-    public void createGamePass() throws DataAccessException {
+    public void createGamePass() throws ResponseException {
         initRegister();
         CreateGameRequest createRequest = new CreateGameRequest("Speedrunning");
         CreateGameResult createGameResult = GAME_SERVICE.createGame(createRequest, existingAuth);
@@ -41,16 +41,16 @@ public class GameServiceTests {
     }
 
     @Test
-    public void createFail() throws DataAccessException {
+    public void createFail() throws ResponseException {
         initRegister();
         CreateGameRequest createRequest = new CreateGameRequest("hi");
-        assertThrows(DataAccessException.class, () -> GAME_SERVICE.createGame(createRequest, null));
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.createGame(createRequest, null));
         CreateGameRequest createNoName = new CreateGameRequest(null);
-        assertThrows(DataAccessException.class, () -> GAME_SERVICE.createGame(createNoName, existingAuth));
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.createGame(createNoName, existingAuth));
     }
 
     @Test
-    public void listGamesPass() throws DataAccessException {
+    public void listGamesPass() throws ResponseException {
         initRegister();
         CreateGameRequest createRequest1 = new CreateGameRequest("hi");
         GAME_SERVICE.createGame(createRequest1, existingAuth);
@@ -66,13 +66,13 @@ public class GameServiceTests {
     }
 
     @Test
-    public void listGamesFail() throws DataAccessException {
+    public void listGamesFail() throws ResponseException {
         initRegister();
-        assertThrows(DataAccessException.class, () -> GAME_SERVICE.listGame(null));
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.listGame(null));
     }
 
     @Test
-    public void joinGamePass() throws DataAccessException {
+    public void joinGamePass() throws ResponseException {
         initRegister();
         JoinGameRequest joinGameRequest = new JoinGameRequest("WHITE", createGame.gameID());
         assertDoesNotThrow(() -> GAME_SERVICE.joinGame(joinGameRequest, existingAuth));
@@ -82,11 +82,11 @@ public class GameServiceTests {
     }
 
     @Test
-    public void joinGameFail() throws DataAccessException {
+    public void joinGameFail() throws ResponseException {
         initRegister();
         JoinGameResult joinGameResult = GAME_SERVICE.joinGame(new JoinGameRequest("WHITE", createGame.gameID()), existingAuth);
-        assertThrows(DataAccessException.class, () -> GAME_SERVICE.joinGame(new JoinGameRequest("WHITE", createGame.gameID()), existingAuth));
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinGameRequest("WHITE", createGame.gameID()), existingAuth));
 
-        assertThrows(DataAccessException.class, () -> GAME_SERVICE.joinGame(new JoinGameRequest("ORANGE", createGame.gameID()), existingAuth));
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinGameRequest("ORANGE", createGame.gameID()), existingAuth));
     }
 }

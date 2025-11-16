@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.AuthData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ public class SQLAuthDAOTests {
     }
 
     @Test
-    void saveAuthSuccess() throws DataAccessException {
+    void saveAuthSuccess() throws ResponseException {
         AuthData auth = new AuthData("ScarGoodtimes", UUID.randomUUID().toString());
         authAccess.saveAuth(auth);
 
@@ -32,17 +33,17 @@ public class SQLAuthDAOTests {
     @Test
     void saveAuthFailNothing() {
         AuthData auth = new AuthData(null, null);
-        assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
+        assertThrows(ResponseException.class, () -> authAccess.saveAuth(auth));
     }
 
     @Test
     void saveAuthFailNoToken() {
         AuthData auth = new AuthData("howdy howdy howdy", null);
-        assertThrows(DataAccessException.class, () -> authAccess.saveAuth(auth));
+        assertThrows(ResponseException.class, () -> authAccess.saveAuth(auth));
     }
 
     @Test
-    void getAuthSuccess() throws DataAccessException {
+    void getAuthSuccess() throws ResponseException {
         AuthData auth = new AuthData("ScarGoodtimes", UUID.randomUUID().toString());
         authAccess.saveAuth(auth);
 
@@ -61,12 +62,12 @@ public class SQLAuthDAOTests {
     }
 
     @Test
-    void getAuthFail() throws DataAccessException {
+    void getAuthFail() throws ResponseException {
         assertNull(authAccess.getAuth("whoops"));
     }
 
     @Test
-    void deleteAuthSuccess() throws DataAccessException {
+    void deleteAuthSuccess() throws ResponseException {
         AuthData auth = new AuthData("ScarGoodtimes", UUID.randomUUID().toString());
         authAccess.saveAuth(auth);
 
@@ -80,7 +81,7 @@ public class SQLAuthDAOTests {
     }
 
     @Test
-    public void clearSuccess() throws DataAccessException {
+    public void clearSuccess() throws ResponseException {
         AuthData auth = new AuthData("ScarGoodtimes", UUID.randomUUID().toString());
         authAccess.saveAuth(auth);
 

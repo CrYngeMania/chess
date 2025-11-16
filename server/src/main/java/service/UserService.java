@@ -2,8 +2,8 @@ package service;
 
 import datamodel.*;
 import dataaccess.AuthDataAccess;
-import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
+import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
 import dataaccess.DataAccess;
@@ -28,16 +28,16 @@ public class UserService {
         return UUID.randomUUID().toString();
     }
 
-    public RegistrationResult register(RegistrationRequest request) throws DataAccessException{
+    public RegistrationResult register(RegistrationRequest request) throws ResponseException {
         if (dataAccess.getUser(request.username()) != null){
-            throw new DataAccessException(DataAccessException.Code.TakenError, "Error: username already taken") ;
+            throw new ResponseException(ResponseException.Code.TakenError, "Error: username already taken") ;
             /** username taken **/
         }
         if (request.username() == null){
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No username provided");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No username provided");
         }
         if (request.password() == null){
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No password provided");
         }
         dataAccess.saveUser(new UserData(request.username(), request.password(), request.email()));
 
@@ -49,19 +49,19 @@ public class UserService {
 
     }
 
-    public LoginResult login(LoginRequest request) throws DataAccessException{
+    public LoginResult login(LoginRequest request) throws ResponseException{
         UserData checkUser = dataAccess.getUser(request.username());
         if (request.username() == null){
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No username provided");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No username provided");
         }
         if ( checkUser == null){
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Username/password is invalid");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Username/password is invalid");
         }
         if (request.password() == null){
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No password provided");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No password provided");
         }
         if (!dataAccess.verifyUser(checkUser.username(), request.password())){
-            throw new DataAccessException(DataAccessException.Code.UnauthorisedError, "Error: Username/password is invalid");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Username/password is invalid");
         }
 
         String token = generateToken();
@@ -71,7 +71,7 @@ public class UserService {
         return new LoginResult(request.username(), token);
     }
 
-    public LogoutResult logout(String authToken) throws DataAccessException {
+    public LogoutResult logout(String authToken) throws ResponseException {
         authService.checkAuth(authToken);
         AuthData currAuth = authDataAccess.getAuth(authToken);
         authDataAccess.deleteAuth(currAuth);
@@ -79,7 +79,7 @@ public class UserService {
         return new LogoutResult();
     }
 
-    public DeleteResult delete(String authToken) throws DataAccessException{
+    public DeleteResult delete(String authToken) throws ResponseException{
         dataAccess.clear();
         gameDataAccess.clear();
         authDataAccess.clear();

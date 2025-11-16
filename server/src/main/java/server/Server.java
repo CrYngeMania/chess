@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import datamodel.*;
 import dataaccess.*;
+import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.GameService;
@@ -22,7 +23,7 @@ public class Server {
 
         try {
             dataAccess.configureDatabase();
-        } catch (DataAccessException ex) {
+        } catch (DataAccessException | ResponseException ex) {
             throw new RuntimeException("Error: Database compilation error");
         }
 
@@ -49,7 +50,7 @@ public class Server {
 
     }
 
-    public void dataErrors(Context ctx, Gson serialiser, DataAccessException ex){
+    public void dataErrors(Context ctx, Gson serialiser, ResponseException ex){
         ctx.status(ex.toHttpStatusCode());
         ctx.result(serialiser.toJson(
                 new ErrorResponse("Error:" + ex.getMessage())
@@ -70,7 +71,7 @@ public class Server {
             var response = userService.register(req);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -87,7 +88,7 @@ public class Server {
             var response = userService.login(req);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -103,7 +104,7 @@ public class Server {
             var response = userService.logout(req);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -121,7 +122,7 @@ public class Server {
             var response = gameService.createGame(req, token);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -139,7 +140,7 @@ public class Server {
             var response = gameService.joinGame(req, token);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -155,7 +156,7 @@ public class Server {
             var response = gameService.listGame(req);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){
@@ -172,7 +173,7 @@ public class Server {
             var response = userService.delete(req);
             ctx.result(serialiser.toJson(response));
         }
-        catch (DataAccessException ex){
+        catch (ResponseException ex){
             dataErrors(ctx, serialiser, ex);
         }
         catch (Exception ex){

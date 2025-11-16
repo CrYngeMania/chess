@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.AuthData;
 
 import java.sql.Connection;
@@ -12,7 +13,7 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
     MySqlDatabaseHandler handler = new MySqlDatabaseHandler();
 
     @Override
-    public AuthData getAuth(String token) throws DataAccessException {
+    public AuthData getAuth(String token) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, authToken FROM auths WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -23,8 +24,8 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
                     }
                 }
             }
-        }catch (SQLException e) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
+        }catch (SQLException | DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Database error");
         }
         return null;
     }
@@ -36,20 +37,20 @@ public class MySqlAuthDataAccess implements AuthDataAccess{
     }
 
     @Override
-    public void deleteAuth(AuthData auth) throws DataAccessException {
+    public void deleteAuth(AuthData auth) throws ResponseException {
         String statement = "DELETE FROM auths WHERE authToken=?";
         handler.executeUpdate(statement, auth.authToken());
 
     }
 
     @Override
-    public void saveAuth(AuthData auth) throws DataAccessException {
+    public void saveAuth(AuthData auth) throws ResponseException {
         var statement = "INSERT INTO auths (username, authToken) VALUES (?, ?)";
         handler.executeUpdate(statement, auth.username(), auth.authToken());
     }
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() throws ResponseException {
         var statement = "TRUNCATE auths";
         handler.executeUpdate(statement);
     }

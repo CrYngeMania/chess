@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exception.ResponseException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void clearSuccess() throws DataAccessException {
+    public void clearSuccess() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(17, null, null, null, chess);
         gameAccess.saveGame(game);
@@ -29,7 +30,7 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void saveGameSuccess() throws DataAccessException {
+    public void saveGameSuccess() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(17, null, null, null, chess);
         gameAccess.saveGame(game);
@@ -40,17 +41,17 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void saveGameFail() throws DataAccessException {
+    public void saveGameFail() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(21, null, null, null, chess);
         gameAccess.saveGame(game);
 
         GameData game2 = new GameData(21, null, null, null, chess);
-        assertThrows(DataAccessException.class, () -> gameAccess.saveGame(game2));
+        assertThrows(ResponseException.class, () -> gameAccess.saveGame(game2));
     }
 
     @Test
-    public void getGameSuccess() throws DataAccessException {
+    public void getGameSuccess() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(17, "Goodtimes", "TheDiggity", "ScarredDogs", chess);
         gameAccess.saveGame(game);
@@ -70,12 +71,12 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void getGameFail() throws DataAccessException {
+    public void getGameFail() throws ResponseException {
         assertNull(gameAccess.getGame(420));
     }
 
     @Test
-    public void getGameListSuccess() throws DataAccessException {
+    public void getGameListSuccess() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(1, "Goodtimes", "TheDiggity", "ScarredDogs", chess);
         gameAccess.saveGame(game);
@@ -94,7 +95,7 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void updateGameSuccess() throws DataAccessException {
+    public void updateGameSuccess() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(1, "Goodtimes", null, "ScarredDogs", chess);
         gameAccess.saveGame(game);
@@ -109,7 +110,7 @@ public class SQLGameDAOTests {
     }
 
     @Test
-    public void updateGameFail() throws DataAccessException {
+    public void updateGameFail() throws ResponseException {
         ChessGame chess = new ChessGame();
         GameData game = new GameData(1, "Goodtimes", null, "ScarredDogs", chess);
         gameAccess.updateGame(420, game);

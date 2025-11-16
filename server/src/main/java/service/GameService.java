@@ -1,14 +1,11 @@
 package service;
-
 import chess.ChessGame;
 import datamodel.*;
 import dataaccess.AuthDataAccess;
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
+import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
@@ -25,7 +22,7 @@ public class GameService {
 
     }
 
-    public Integer generateID() throws DataAccessException {
+    public Integer generateID() throws ResponseException {
         while(true) {
             Random random = new Random();
             int bound = 1000000;
@@ -36,10 +33,10 @@ public class GameService {
         }
     }
 
-    public CreateGameResult createGame(CreateGameRequest request, String authToken) throws DataAccessException {
+    public CreateGameResult createGame(CreateGameRequest request, String authToken) throws ResponseException {
         authService.checkAuth(authToken);
         if (request.gameName() == null) {
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No game name provided");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No game name provided");
         }
 
         Integer gameID = generateID();
@@ -47,7 +44,7 @@ public class GameService {
         return new CreateGameResult(gameID);
     }
 
-    public ListGameResult listGame(String authToken) throws DataAccessException{
+    public ListGameResult listGame(String authToken) throws ResponseException{
         authService.checkAuth(authToken);
 
         ArrayList<GameData> gamesList = gameDataAccess.getGamesList();
@@ -55,21 +52,21 @@ public class GameService {
 
     }
 
-    public JoinGameResult joinGame(JoinGameRequest request, String authToken) throws DataAccessException{
+    public JoinGameResult joinGame(JoinGameRequest request, String authToken) throws ResponseException{
         authService.checkAuth(authToken);
         AuthData currAuth = authDataAccess.getAuth(authToken);
 
         GameData game = gameDataAccess.getGame(request.gameID());
         if (game == null) {
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: No game exists");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: No game exists");
         }
         if (!Objects.equals(request.playerColor(), "WHITE") && !Objects.equals(request.playerColor(), "BLACK")){
-            throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Invalid Color");
+            throw new ResponseException(ResponseException.Code.ClientError, "Error: Invalid Color");
         }
         if (Objects.equals(request.playerColor(), "WHITE")){
             String checkColor = game.whiteUsername();
             if (checkColor != null){
-                throw new DataAccessException(DataAccessException.Code.TakenError, "Error: Already taken");
+                throw new ResponseException(ResponseException.Code.TakenError, "Error: Already taken");
             }
             GameData newGame = new GameData(request.gameID(), currAuth.username(), game.blackUsername(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);
@@ -77,7 +74,7 @@ public class GameService {
         else if (Objects.equals(request.playerColor(), "BLACK")){
             String checkColor = game.blackUsername();
             if (checkColor != null){
-                throw new DataAccessException(DataAccessException.Code.TakenError, "Error: Already taken");
+                throw new ResponseException(ResponseException.Code.TakenError, "Error: Already taken");
             }
             GameData newGame = new GameData(request.gameID(), game.whiteUsername(), currAuth.username(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);

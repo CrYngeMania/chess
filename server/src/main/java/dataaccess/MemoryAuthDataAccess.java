@@ -22,10 +22,6 @@ public class MemoryAuthDataAccess implements AuthDataAccess{
         return auths.get(token);
     }
 
-    public HashMap<String, AuthData> getAuths(){
-        return auths;
-    }
-
     public void clear(){
         auths.clear();
     }

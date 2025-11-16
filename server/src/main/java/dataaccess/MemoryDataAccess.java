@@ -1,10 +1,7 @@
 package dataaccess;
 
-import model.AuthData;
-import model.GameData;
+import exception.ResponseException;
 import model.UserData;
-import dataaccess.GameDataAccess;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -36,7 +33,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public boolean verifyUser(String username, String providedPassword) throws DataAccessException {
+    public boolean verifyUser(String username, String providedPassword) {
         UserData user = getUser(username);
         if (user == null){
             return false;

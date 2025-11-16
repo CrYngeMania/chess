@@ -10,6 +10,8 @@ public class ResponseException extends Exception {
     public enum Code {
         ServerError,
         ClientError,
+        TakenError,
+        UnauthorisedError,
     }
 
     final private Code code;
@@ -46,6 +48,8 @@ public class ResponseException extends Exception {
         return switch (code) {
             case ServerError -> 500;
             case ClientError -> 400;
+            case TakenError -> 403;
+            case UnauthorisedError -> 401;
         };
     }
 }

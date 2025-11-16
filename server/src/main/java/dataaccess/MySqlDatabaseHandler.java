@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.GameData;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -13,7 +14,7 @@ public class MySqlDatabaseHandler {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    void executeUpdate(String statement, Object... params) throws DataAccessException {
+    void executeUpdate(String statement, Object... params) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection()) {
         PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             for (int i = 0; i < params.length; i++) {
@@ -33,8 +34,10 @@ public class MySqlDatabaseHandler {
             if (rs.next()) {
                 rs.getInt(1);
             }
-        } catch (SQLException | DataAccessException ex){
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to update database.");
+        } catch (SQLException ex){
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Unable to update database.");
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -71,7 +74,7 @@ public class MySqlDatabaseHandler {
     """
     };
 
-    void configureDatabase() throws DataAccessException {
+    void configureDatabase() throws ResponseException, DataAccessException {
 
         DatabaseManager.createDatabase();
 
@@ -81,8 +84,8 @@ public class MySqlDatabaseHandler {
                     preparedStatement.executeUpdate();
                 }
             }
-        } catch (SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to configure database");
+        } catch (SQLException | DataAccessException ex) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Unable to configure database");
         }
     }
 

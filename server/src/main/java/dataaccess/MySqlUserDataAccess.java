@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -14,20 +15,20 @@ public class MySqlUserDataAccess implements DataAccess {
     MySqlDatabaseHandler handler = new MySqlDatabaseHandler();
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() throws ResponseException {
         var statement = "TRUNCATE users";
         handler.executeUpdate(statement);
     }
 
     @Override
-    public void saveUser(UserData user) throws DataAccessException {
+    public void saveUser(UserData user) throws ResponseException {
         String hashedPassword = handler.createUserPassword(user.password());
         var statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         handler.executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username, password, email FROM users WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -38,8 +39,8 @@ public class MySqlUserDataAccess implements DataAccess {
                     }
                 }
             }
-        }catch (SQLException e) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
+        }catch (SQLException | DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Database error");
         }
         return null;
     }
@@ -51,7 +52,7 @@ public class MySqlUserDataAccess implements DataAccess {
         return new UserData(username, password, email);
     }
 
-    public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
+    public boolean verifyUser(String username, String providedClearTextPassword) throws ResponseException {
         UserData user = getUser(username);
         if (user == null){ return false;}
 
@@ -59,7 +60,7 @@ public class MySqlUserDataAccess implements DataAccess {
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
-    public void configureDatabase() throws DataAccessException {
+    public void configureDatabase() throws ResponseException, DataAccessException {
         handler.configureDatabase();
     }
 }

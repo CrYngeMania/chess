@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exception.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void saveUserSuccess() throws DataAccessException {
+    public void saveUserSuccess() throws ResponseException {
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
 
@@ -27,7 +28,7 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void saveUserSuccessMultiple() throws DataAccessException {
+    public void saveUserSuccessMultiple() throws ResponseException {
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
         UserData user2 = new UserData("Its 2AM rn", "dippledop", "mail");
@@ -52,19 +53,19 @@ public class SQLUserDAOTests {
     @Test
     public void saveUserFailNoUsername() {
         UserData user = new UserData(null, "dippledop", "mail");
-        assertThrows(DataAccessException.class, () -> access.saveUser(user));
+        assertThrows(ResponseException.class, () -> access.saveUser(user));
     }
 
     @Test
-    public void saveUserFailDuplicate() throws DataAccessException {
+    public void saveUserFailDuplicate() throws ResponseException {
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
         UserData user2 = new UserData("ScarGoodtimes", "dippledop", "mail");
-        assertThrows(DataAccessException.class, () -> access.saveUser(user2));
+        assertThrows(ResponseException.class, () -> access.saveUser(user2));
     }
 
     @Test
-    public void getUserSuccess() throws DataAccessException {
+    public void getUserSuccess() throws ResponseException {
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
 
@@ -83,14 +84,14 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void getUserFail() throws DataAccessException{
+    public void getUserFail() throws ResponseException{
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
         assertNull(access.getUser(null));
     }
 
     @Test
-    public void verifyUserSuccess() throws DataAccessException {
+    public void verifyUserSuccess() throws ResponseException {
         UserData user = new UserData("ScarGoodtimes", "dippledop", "mail");
         access.saveUser(user);
 
@@ -98,7 +99,7 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void verifyUserFail() throws DataAccessException {
+    public void verifyUserFail() throws ResponseException {
         UserData user = new UserData("Scarrrrrr", "dippledop", "mail");
         access.saveUser(user);
 
@@ -106,7 +107,7 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void verifyUserNoUsername() throws DataAccessException {
+    public void verifyUserNoUsername() throws ResponseException {
         UserData user = new UserData("Scarrrrrr", "dippledop", "mail");
         access.saveUser(user);
 
@@ -114,7 +115,7 @@ public class SQLUserDAOTests {
     }
 
     @Test
-    public void clearSuccess() throws DataAccessException {
+    public void clearSuccess() throws ResponseException {
         UserData user = new UserData("whats up", "dippledop", "mail");
         access.saveUser(user);
 

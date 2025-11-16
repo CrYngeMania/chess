@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import exception.ResponseException;
 import model.GameData;
 
 import java.sql.Connection;
@@ -15,7 +16,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
     MySqlDatabaseHandler handler = new MySqlDatabaseHandler();
 
     @Override
-    public void saveGame(GameData game) throws DataAccessException {
+    public void saveGame(GameData game) throws ResponseException {
         var statement = "INSERT INTO games (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         var serialiser = new Gson();
         String jsonGame = serialiser.toJson(game.game());
@@ -23,7 +24,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
     }
 
     @Override
-    public GameData getGame(Integer gameID) throws DataAccessException {
+    public GameData getGame(Integer gameID) throws ResponseException {
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -34,13 +35,13 @@ public class MySqlGameDataAccess implements GameDataAccess{
                     }
                 }
             }
-        }catch (SQLException e) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Database error");
+        }catch (SQLException | DataAccessException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Database error");
         }
         return null;
     }
 
-    private GameData readGame(ResultSet result) throws DataAccessException {
+    private GameData readGame(ResultSet result) throws ResponseException {
         try {
             var serialiser = new Gson();
             int gameID = result.getInt("gameID");
@@ -51,13 +52,13 @@ public class MySqlGameDataAccess implements GameDataAccess{
             ChessGame game = serialiser.fromJson(jsonGame, ChessGame.class);
             return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
         }catch(SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: database error");
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: database error");
         }
 
     }
 
     @Override
-    public ArrayList<GameData> getGamesList() throws DataAccessException {
+    public ArrayList<GameData> getGamesList() throws ResponseException {
         ArrayList<GameData> games = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM games";
@@ -69,13 +70,13 @@ public class MySqlGameDataAccess implements GameDataAccess{
                 }
             }
         } catch (Exception e){
-            throw new DataAccessException(DataAccessException.Code.ServerError, "Error: Unable to access database");
+            throw new ResponseException(ResponseException.Code.ServerError, "Error: Unable to access database");
         }
         return games;
     }
 
     @Override
-    public void updateGame(Integer gameID, GameData newGame) throws DataAccessException {
+    public void updateGame(Integer gameID, GameData newGame) throws ResponseException {
         var statement = "UPDATE games SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
         var serialiser = new Gson();
         String jsonGame = serialiser.toJson(newGame.game());
@@ -83,7 +84,7 @@ public class MySqlGameDataAccess implements GameDataAccess{
     }
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() throws ResponseException {
         var statement = "TRUNCATE games";
         handler.executeUpdate(statement);
     }

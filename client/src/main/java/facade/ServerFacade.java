@@ -3,7 +3,6 @@ package facade;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
-
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -121,15 +120,15 @@ public class ServerFacade {
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response) throws ResponseException {
+    private HashMap<String, Object> handleResponse(HttpResponse<String> response) throws ResponseException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
-            if (body != null) {
-                throw ResponseException.fromJson(body);
+            if (body != null && !body.isEmpty()) {
+                throw new ResponseException(ResponseException.Code.ClientError, "Error: Bad response");
             }
-
-            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status),
+                    "No response body received for status: " + status);
         }
 
         if (response.body() != null) {
