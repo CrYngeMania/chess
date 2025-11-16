@@ -80,8 +80,7 @@ public class PreLoginClient {
             String password = params[1];
             String email = params[2];
 
-            RegistrationRequest request = new RegistrationRequest(username, password, email);
-            server.register(request);
+            server.register(username, password, email);
             System.out.printf("You're registered as %s! Welcome to the game :)", username);
             runPost();
             return "";
@@ -100,8 +99,7 @@ public class PreLoginClient {
             String username = params[0];
             String password = params[1];
 
-            LoginRequest request = new LoginRequest(username, password);
-            server.login(request);
+            server.login(username, password);
             System.out.printf("Welcome back, %s! You're logged in!", username);
             runPost();
             return "";

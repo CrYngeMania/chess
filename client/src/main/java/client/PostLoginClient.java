@@ -2,10 +2,6 @@ package client;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
-import datamodel.CreateGameRequest;
-import datamodel.JoinGameRequest;
-import datamodel.ListGameResult;
-import datamodel.LogoutResult;
 import facade.ServerFacade;
 import model.GameData;
 
@@ -76,18 +72,19 @@ public class PostLoginClient {
         if (params.length >= 1) {
             String gameName = params[0];
 
-            CreateGameRequest request = new CreateGameRequest(gameName);
-            server.createGame(request);
+            server.createGame(gameName);
             return String.format("Game %s created!", gameName);
         }
         throw new DataAccessException(DataAccessException.Code.ClientError, "Error: Expected <NAME>");
     }
 
-    public List<Map<String, Object>> listGames(ListGameResult games) {
+    public List<Map<String, Object>> listGames(HashMap<String, Object> gameResponse) {
         List<Map<String, Object>> prettyList = new ArrayList<>();
 
-        for (int i = 0; i< games.games().size(); i++){
-            GameData game = games.games().get(i);
+        ArrayList<GameData> games = (ArrayList<GameData>) gameResponse.get("games");
+
+        for (int i = 0; i< games.size(); i++){
+            GameData game = games.get(i);
             Map<String, Object> summary = new HashMap<>();
 
             summary.put("number", i + 1);
@@ -105,7 +102,7 @@ public class PostLoginClient {
     }
 
     public String list() throws DataAccessException{
-        ListGameResult result = server.listGame();
+        HashMap<String, Object> result = server.listGame();
 
 
         StringBuilder builder = new StringBuilder();
@@ -137,7 +134,7 @@ public class PostLoginClient {
                 }
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
-                server.joinGame(new JoinGameRequest(playerColor, gameID));
+                server.joinGame(playerColor, gameID);
                 //runGame(playerColor, (ChessGame) wantedGame.get("game"));
                 return("");
         }

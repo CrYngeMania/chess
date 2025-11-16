@@ -6,6 +6,8 @@ import facade.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
 
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -27,7 +29,7 @@ public class ServerFacadeTests {
     @BeforeEach
     void setup() throws Exception {
         facade.delete();
-        facade.register(new RegistrationRequest("dippleDop", "impy", "sv"));
+        facade.register("dippleDop", "impy", "sv");
     }
 
     @AfterAll
@@ -37,41 +39,35 @@ public class ServerFacadeTests {
 
     @Test
     public void testRegisterPass() throws DataAccessException {
-        RegistrationRequest request = new RegistrationRequest("Jackaboy", "wapoosh", "ksdjhf");
-        RegistrationResult result = facade.register(request);
+        HashMap<String, Object> result = facade.register("Jackaboy", "wapoosh", "ksdjhf");
 
-        assertEquals(result.username(), request.username());
-        assertNotNull(result.authToken());
+        assertEquals("Jackaboy", result.get("username"));
+        assertNotNull(result.get("authToken"));
     }
 
     @Test
     public void testRegisterFail() throws DataAccessException {
-        RegistrationRequest request = new RegistrationRequest(null, "wapoosh", "ksdjhf");
-
-        assertThrows(DataAccessException.class, () -> facade.register(request));
+        assertThrows(DataAccessException.class, () -> facade.register(null, "wapoosh", "ksdjhf"));
     }
 
     @Test
     public void testLoginPass() throws DataAccessException {
-        LoginRequest request = new LoginRequest("dippleDop", "impy");
-        LoginResult result = facade.login(request);
+        HashMap<String, Object> result = facade.login("dippleDop", "impy");
 
-        assertEquals(result.username(), request.username());
-        assertNotNull(result.authToken());
+        assertEquals("dippleDop", result.get("username"));
+        assertNotNull(result.get("authToken"));
     }
 
     @Test
     public void testLoginFail() throws DataAccessException {
-        LoginRequest request = new LoginRequest("illFail", "watch me fail");
-        assertThrows(DataAccessException.class, () -> facade.login(request));
+        assertThrows(DataAccessException.class, () -> facade.login("illFail", "watch me fail"));
     }
 
     @Test
     public void testLogoutSuccess() throws DataAccessException {
-        LoginRequest request = new LoginRequest("dippleDop", "impy");
-        facade.login(request);
+        facade.login("dippleDop", "impy");
 
-        LogoutResult result = facade.logout();
+        HashMap<String, Object> result = facade.logout();
         assertNotNull(result);
     }
 
@@ -83,33 +79,26 @@ public class ServerFacadeTests {
 
     @Test
     public void testCreateGamePass() throws DataAccessException {
-        CreateGameRequest request = new CreateGameRequest("creative name");
-        CreateGameResult result = facade.createGame(request);
+        HashMap<String, Object> result = facade.createGame("request");
 
-        assertNotNull(result.gameID());
+        assertNotNull(result.get("gameID"));
     }
 
     @Test
     public void testCreateGameFail() throws DataAccessException{
-        CreateGameRequest request = new CreateGameRequest(null);
-        assertThrows(DataAccessException.class, () -> facade.createGame(request));
-
+        assertThrows(DataAccessException.class, () -> facade.createGame(null));
         facade.delete();
-        CreateGameRequest request2 = new CreateGameRequest("creative name");
-        assertThrows(DataAccessException.class, () -> facade.createGame(request2));
+        assertThrows(DataAccessException.class, () -> facade.createGame("creative name"));
     }
 
     @Test
     public void testListGamePass() throws DataAccessException{
-        CreateGameRequest request = new CreateGameRequest("creative name");
-        facade.createGame(request);
+        facade.createGame("creative name");
 
         assertNotNull(facade.listGame());
 
-        CreateGameRequest request2 = new CreateGameRequest("another creative name");
-        facade.createGame(request2);
-        CreateGameRequest request3 = new CreateGameRequest("im so creative");
-        facade.createGame(request3);
+        facade.createGame("another creative name");
+        facade.createGame("im so creative");
 
         assertNotNull(facade.listGame());
     }
@@ -123,35 +112,26 @@ public class ServerFacadeTests {
 
     @Test
     public void testJoinGamePass() throws DataAccessException {
-        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
-        CreateGameResult gameResult = facade.createGame(gameRequest);
-        JoinGameRequest request = new JoinGameRequest("WHITE", gameResult.gameID());
-
-        assertDoesNotThrow(() -> facade.joinGame(request));
+        HashMap<String, Object> gameResult = facade.createGame("creative name");
+        assertDoesNotThrow(() -> facade.joinGame("WHITE", (Integer) gameResult.get("gameID")));
     }
 
     @Test
     public void testJoinGameFail() throws DataAccessException {
-        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
-        CreateGameResult gameResult = facade.createGame(gameRequest);
-        JoinGameRequest request = new JoinGameRequest("WHITE", gameResult.gameID());
-        facade.joinGame(request);
-        JoinGameRequest request2 = new JoinGameRequest("WHITE", gameResult.gameID());
-        assertThrows(DataAccessException.class, () -> facade.joinGame(request2));
+        HashMap<String, Object> gameResult = facade.createGame("creative name");
+        facade.joinGame("WHITE", (Integer) gameResult.get("gameID"));
+        assertThrows(DataAccessException.class, () -> facade.joinGame("WHITE", (Integer) gameResult.get("gameID")));
     }
 
     @Test
     public void testDeletePass() throws DataAccessException {
-        CreateGameRequest gameRequest = new CreateGameRequest("creative name");
-        facade.createGame(gameRequest);
+        facade.createGame("creative name");
 
-        CreateGameRequest request2 = new CreateGameRequest("another creative name");
-        facade.createGame(request2);
-        CreateGameRequest request3 = new CreateGameRequest("im so creative");
-        facade.createGame(request3);
+        facade.createGame("another creative name");
+        facade.createGame("im so creative");
 
         facade.delete();
 
-        assertThrows(DataAccessException.class, () -> facade.login(new LoginRequest("dippleDop", "impy")));
+        assertThrows(DataAccessException.class, () -> facade.login("dippleDop", "impy"));
     }
 }

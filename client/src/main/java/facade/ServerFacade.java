@@ -1,13 +1,16 @@
 package facade;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import dataaccess.DataAccessException;
 import datamodel.*;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -20,52 +23,74 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public RegistrationResult register(RegistrationRequest request) throws DataAccessException {
+    public HashMap<String, Object> register(String username, String password, String email) throws DataAccessException {
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("username", username);
+        request.put("password", password);
+        request.put("email", email);
+
         var httpRequest = buildRequest("POST", "/user", request);
         var response = sendRequest(httpRequest);
-        RegistrationResult reg =  handleResponse(response, RegistrationResult.class);
+        HashMap<String, Object> reg =  handleResponse(response);
         assert reg != null;
-        authToken = reg.authToken();
+        authToken = (String) reg.get("authToken");
         return reg;
     }
 
-    public LoginResult login(LoginRequest request) throws DataAccessException {
+    public HashMap<String, Object> login(String username, String password) throws DataAccessException {
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("username", username);
+        request.put("password", password);
+
         var httpRequest = buildRequest("POST", "/session", request);
         var response = sendRequest(httpRequest);
-        LoginResult login =  handleResponse(response, LoginResult.class);
+        HashMap<String, Object> login =  handleResponse(response);
         assert login != null;
-        authToken = login.authToken();
+        authToken = (String) login.get("authToken");
         return login;
     }
 
-    public LogoutResult logout() throws DataAccessException {
+    public HashMap<String, Object> logout() throws DataAccessException {
         var httpRequest = buildRequest("DELETE", "/session",null);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, LogoutResult.class);
+        return handleResponse(response);
     }
 
-    public JoinGameResult joinGame(JoinGameRequest request) throws DataAccessException {
+    public HashMap<String, Object> joinGame(String playerColor, Integer gameID) throws DataAccessException {
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("playerColor", playerColor);
+        request.put("gameID", gameID);
         var httpRequest = buildRequest("PUT", "/game", request);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, JoinGameResult.class);
+        HashMap<String, Object> result = handleResponse(response);
+        if (result.containsKey("gameID") && result.get("gameID") instanceof Double d){
+            result.put("gameID", d.intValue());
+        }
+        return result;
     }
 
-    public CreateGameResult createGame(CreateGameRequest request) throws DataAccessException {
+    public HashMap<String, Object> createGame(String gameName) throws DataAccessException {
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("gameName", gameName);
         var httpRequest = buildRequest("POST", "/game", request);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, CreateGameResult.class);
+        HashMap<String, Object> result = handleResponse(response);
+        if (result.containsKey("gameID") && result.get("gameID") instanceof Double d){
+            result.put("gameID", d.intValue());
+        }
+        return result;
     }
 
-    public ListGameResult listGame() throws DataAccessException {
+    public HashMap<String, Object> listGame() throws DataAccessException {
         var httpRequest = buildRequest("GET", "/game", null);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, ListGameResult.class);
+        return handleResponse(response);
     }
 
-    public DeleteResult delete() throws DataAccessException {
+    public void delete() throws DataAccessException {
         var httpRequest = buildRequest("DELETE", "/db", null);
         var response = sendRequest(httpRequest);
-        return handleResponse(response, DeleteResult.class);
+        handleResponse(response);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {
@@ -97,7 +122,7 @@ public class ServerFacade {
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException {
+    private <T> T handleResponse(HttpResponse<String> response) throws DataAccessException {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
@@ -108,8 +133,9 @@ public class ServerFacade {
             throw new DataAccessException(DataAccessException.fromHttpStatusCode(status), "other failure: " + status);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        if (response.body() != null) {
+            Type mapType = new TypeToken<HashMap<String, Object>>(){}.getType();
+            return new Gson().fromJson(response.body(), mapType);
         }
 
         return null;
