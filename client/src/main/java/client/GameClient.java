@@ -22,13 +22,22 @@ public class GameClient {
         this.game = game;
     }
 
-
-
-
     public void run() {
         var out = new PrintStream(System.out, true);
             printBoard(out);
     }
+
+    public String help() {
+        return """
+                    redraw - redraws the current board
+                    leave - leave the game
+                    makeMove <move> - moves your piece
+                    resign - admit defeat and leave the game
+                    highlight - shows all your legal moves
+                    help - shows possible commands""";
+    }
+
+
 
     public static final int BOARD_SIZE_IN_SQUARES = 8;
     public static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
