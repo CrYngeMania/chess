@@ -143,7 +143,7 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null && !body.isEmpty()) {
-                throw new ResponseException(ResponseException.Code.ClientError, "Error: Bad response");
+                throw ResponseException.fromJson(body);
             }
             throw new ResponseException(ResponseException.fromHttpStatusCode(status),
                     "No response body received for status: " + status);

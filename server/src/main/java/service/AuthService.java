@@ -13,10 +13,10 @@ public class AuthService {
 
     public void checkAuth(String authToken) throws ResponseException {
         if (authToken == null){
-            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Unauthorised");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, " Unauthorised");
         }
         if (authDataAccess.getAuth(authToken) == null) {
-            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Unauthorised");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, " Unauthorised");
         }
     }
 }

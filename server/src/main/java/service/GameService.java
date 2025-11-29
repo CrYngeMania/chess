@@ -36,7 +36,7 @@ public class GameService {
     public CreateGameResult createGame(CreateGameRequest request, String authToken) throws ResponseException {
         authService.checkAuth(authToken);
         if (request.gameName() == null) {
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No game name provided");
+            throw new ResponseException(ResponseException.Code.ClientError, " No game name provided");
         }
 
         Integer gameID = generateID();
@@ -58,15 +58,15 @@ public class GameService {
 
         GameData game = gameDataAccess.getGame(request.gameID());
         if (game == null) {
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No game exists");
+            throw new ResponseException(ResponseException.Code.ClientError, " No game exists");
         }
         if (!Objects.equals(request.playerColor(), "WHITE") && !Objects.equals(request.playerColor(), "BLACK")){
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: Invalid Color");
+            throw new ResponseException(ResponseException.Code.ClientError, " Invalid Color");
         }
         if (Objects.equals(request.playerColor(), "WHITE")){
             String checkColor = game.whiteUsername();
             if (checkColor != null){
-                throw new ResponseException(ResponseException.Code.TakenError, "Error: Already taken");
+                throw new ResponseException(ResponseException.Code.TakenError, " Already taken");
             }
             GameData newGame = new GameData(request.gameID(), currAuth.username(), game.blackUsername(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);
@@ -74,7 +74,7 @@ public class GameService {
         else if (Objects.equals(request.playerColor(), "BLACK")){
             String checkColor = game.blackUsername();
             if (checkColor != null){
-                throw new ResponseException(ResponseException.Code.TakenError, "Error: Already taken");
+                throw new ResponseException(ResponseException.Code.TakenError, " Already taken");
             }
             GameData newGame = new GameData(request.gameID(), game.whiteUsername(), currAuth.username(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);

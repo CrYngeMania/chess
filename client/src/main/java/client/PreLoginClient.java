@@ -4,6 +4,7 @@ import exception.ResponseException;
 import facade.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class PreLoginClient {
@@ -15,7 +16,7 @@ public class PreLoginClient {
 
 
     public void run() {
-        System.out.println("Welcome to 240 Chess! Type help to get started :D");
+        System.out.println("Welcome to CS 240 Chess! Type help to get started :D");
         Scanner scanner = new Scanner(System.in);
         String result = "";
         while(!result.equals("quit")) {
@@ -96,6 +97,11 @@ public class PreLoginClient {
         if (params.length >= 2) {
             String username = params[0];
             String password = params[1];
+
+            if (Objects.equals(username, "jay")) {
+                System.out.println("jay, you're here quite a lot.....");
+                System.out.println("Maybe you should take a break from chess.....");
+            }
 
             server.login(username, password);
             System.out.printf("Welcome back, %s! You're logged in!", username);

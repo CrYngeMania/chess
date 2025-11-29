@@ -63,6 +63,7 @@ public class PostLoginClient {
                     create <NAME> - creates a game with the given name
                     list - shows all games
                     join <ID> [WHITE|BLACK] - join a game
+                    * When joining a game, make sure the color you want is open!
                     observe <ID> - a game
                     logout - logs out the user
                     help - shows possible commands""";
@@ -104,7 +105,6 @@ public class PostLoginClient {
     public String list() throws ResponseException{
         HashMap<String, Object> result = server.listGame();
 
-
         StringBuilder builder = new StringBuilder();
         var listToPrint = listGames(result);
         for (var game: listToPrint){
@@ -116,6 +116,10 @@ public class PostLoginClient {
                     .append("), Black Player(")
                     .append(game.get("blackUsername"))
                     .append(")\n");
+        }
+
+        if (listToPrint.isEmpty()){
+            return "No games! Maybe you should make one :)";
         }
         return builder.toString();
     }
@@ -129,9 +133,13 @@ public class PostLoginClient {
                 catch (Exception e){
                     throw new ResponseException(ResponseException.Code.ClientError, "Error: I need the number of the game, silly :)");
                 }
-                if (currentGames == null || gameNumber < 1 || gameNumber > currentGames.size()){
+                if (currentGames.isEmpty()){
+                    throw new ResponseException(ResponseException.Code.ClientError, "Error: Make sure you list the games first!");
+                }
+                if (gameNumber < 1 || gameNumber > currentGames.size()){
                     throw new ResponseException(ResponseException.Code.ClientError, "Error: I need a valid game number, player ;)");
                 }
+
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
                 server.joinGame(playerColor, gameID);
@@ -150,12 +158,13 @@ public class PostLoginClient {
             catch (Exception e){
                 throw new ResponseException(ResponseException.Code.ClientError, "Error: I need the number of the game, silly :)");
             }
-            if ( gameNumber < 1|| (gameNumber > currentGames.size() && currentGames.size() > 1)){
-                throw new ResponseException(ResponseException.Code.ClientError, "Error: I need a valid game number, player ;)");
-            }
             if (currentGames.isEmpty()){
                 throw new ResponseException(ResponseException.Code.ClientError, "Error: Make sure you list the games first!");
             }
+            if (gameNumber < 1 || gameNumber > currentGames.size()){
+                throw new ResponseException(ResponseException.Code.ClientError, "Error: I need a valid game number, player ;)");
+            }
+
             var wantedGame = currentGames.get(gameNumber - 1);
             runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
             return "";

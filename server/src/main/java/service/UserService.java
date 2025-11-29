@@ -30,14 +30,14 @@ public class UserService {
 
     public RegistrationResult register(RegistrationRequest request) throws ResponseException {
         if (dataAccess.getUser(request.username()) != null){
-            throw new ResponseException(ResponseException.Code.TakenError, "Error: username already taken") ;
+            throw new ResponseException(ResponseException.Code.TakenError, " Username already taken") ;
             /** username taken **/
         }
         if (request.username() == null){
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No username provided");
+            throw new ResponseException(ResponseException.Code.ClientError, " No username provided");
         }
         if (request.password() == null){
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No password provided");
+            throw new ResponseException(ResponseException.Code.ClientError, " No password provided");
         }
         dataAccess.saveUser(new UserData(request.username(), request.password(), request.email()));
 
@@ -52,16 +52,16 @@ public class UserService {
     public LoginResult login(LoginRequest request) throws ResponseException{
         UserData checkUser = dataAccess.getUser(request.username());
         if (request.username() == null){
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No username provided");
+            throw new ResponseException(ResponseException.Code.ClientError, " No username provided");
         }
         if ( checkUser == null){
-            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Username/password is invalid");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, " Username/password is invalid");
         }
         if (request.password() == null){
-            throw new ResponseException(ResponseException.Code.ClientError, "Error: No password provided");
+            throw new ResponseException(ResponseException.Code.ClientError, " No password provided");
         }
         if (!dataAccess.verifyUser(checkUser.username(), request.password())){
-            throw new ResponseException(ResponseException.Code.UnauthorisedError, "Error: Username/password is invalid");
+            throw new ResponseException(ResponseException.Code.UnauthorisedError, " Username/password is invalid");
         }
 
         String token = generateToken();

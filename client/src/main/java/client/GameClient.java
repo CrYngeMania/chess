@@ -2,11 +2,13 @@ package client;
 
 import chess.ChessGame;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import facade.ServerFacade;
 
 import java.io.PrintStream;
 import java.util.Objects;
 
+import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
 
 public class GameClient {
@@ -36,7 +38,7 @@ public class GameClient {
 
         String[] headers = {"a", "b", "c", "d", "e", "f", "g", "h"};
 
-        out.print("   ");
+        out.print(" ");
 
         if (Objects.equals(playerType, "WHITE") || Objects.equals(playerType, "OBSERVER")) {
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
@@ -61,15 +63,19 @@ public class GameClient {
         out.print(header);
     }
 
-    private static void drawBoard(PrintStream out) {
+    private void drawBoard(PrintStream out) {
         for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; boardRow++){
             drawRowOfSquares(out, boardRow);
         }
     }
 
-    private static void drawRowOfSquares(PrintStream out, int boardRow) {
+    private void drawRowOfSquares(PrintStream out, int boardRow) {
 
-        int displayRow = BOARD_SIZE_IN_SQUARES - boardRow;
+        int displayRow = BOARD_SIZE_IN_SQUARES - boardRow;;
+        if (Objects.equals("BLACK", playerType)) {
+            displayRow = 1 + boardRow;
+        }
+
         out.print(displayRow + " ");
 
 
@@ -78,17 +84,117 @@ public class GameClient {
                 out.print(SET_BG_COLOR_LIGHT_GREY);
             } else {out.print(SET_BG_COLOR_DARK_GREY);}
 
-            out.print(EMPTY.repeat(SQUARE_SIZE_IN_PADDED_CHARS));
-
+            if (Objects.equals("BLACK", playerType)) {
+                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(boardRow + 1, BOARD_SIZE_IN_SQUARES - boardCol));
+                if (piece == null){
+                    out.print(EMPTY);
+                }
+                else{
+                    printPiece(out, piece);
+                }
+            }
+            else{
+                ChessPiece piece = game.getBoard().getPiece(new ChessPosition( BOARD_SIZE_IN_SQUARES -  boardRow, boardCol + 1));
+                if (piece == null){
+                    out.print(EMPTY);
+                }
+                else{
+                    printPiece(out, piece);
+                }
+            }
             }
 
+
+
         out.print(RESET_BG_COLOR);
+        out.print(" " + displayRow);
         out.println();
+    }
+
+    private void printPiece(PrintStream out, ChessPiece piece) {
+        ChessGame.TeamColor color = piece.getTeamColor();
+        if (Objects.equals(ChessGame.TeamColor.BLACK, color)){
+            printBlack(out, piece.getPieceType());
+        }
+        else{printWhite(out, piece.getPieceType());}
+    }
+
+    private void printBlack(PrintStream out, PieceType type) {
+        switch (type){
+            case PieceType.PAWN -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_PAWN);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.ROOK -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_ROOK);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.BISHOP -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_BISHOP);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.KNIGHT -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_KNIGHT);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.QUEEN -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_QUEEN);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.KING -> {
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(BLACK_KING);
+                out.print(RESET_TEXT_COLOR);
+            }
+        }
+    }
+
+    private void printWhite(PrintStream out, PieceType type) {
+        switch (type){
+            case PieceType.PAWN -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_PAWN);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.ROOK -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_ROOK);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.BISHOP -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_BISHOP);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.KNIGHT -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_KNIGHT);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.QUEEN -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_QUEEN);
+                out.print(RESET_TEXT_COLOR);
+            }
+            case PieceType.KING -> {
+                out.print(SET_TEXT_COLOR_WHITE);
+                out.print(WHITE_KING);
+                out.print(RESET_TEXT_COLOR);
+            }
+        }
     }
 
     public void printBoard(PrintStream out){
         drawHeaders(out);
         out.println();
         drawBoard(out);
+        drawHeaders(out);
     }
 }
+
+
