@@ -3,10 +3,11 @@ package client;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import exception.ResponseException;
 import facade.ServerFacade;
 
 import java.io.PrintStream;
-import java.util.Objects;
+import java.util.*;
 
 import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
@@ -15,6 +16,8 @@ public class GameClient {
     private final ServerFacade server;
     String playerType;
     ChessGame game;
+    PrintStream out = new PrintStream(System.out, true);
+
 
     public GameClient(ServerFacade server, String playerType, ChessGame game) {
         this.server = server;
@@ -23,21 +26,62 @@ public class GameClient {
     }
 
     public void run() {
-        var out = new PrintStream(System.out, true);
-            printBoard(out);
+        printBoard(out);
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while(!result.equals("Logging out!")) {
+            printPrompt();
+            String line = scanner.nextLine();
+
+            try {
+                result = evaluate(line);
+                System.out.print(result);
+            } catch (Throwable e){
+                var msg = e.toString();
+                System.out.print(msg);
+            }
+        }
+        System.out.println();
+    }
+
+    public String evaluate(String input) {
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "help" -> help();
+                case "redraw" -> reprintBoard(out);
+                case "leave" -> "needs created";
+                case "move" -> "needs created";
+                case "resign" -> "needs created";
+                case "highlight" -> "needs created";
+                default -> "That's not a valid command, you silly goober";
+            };
+
+        } catch (ResponseException ex) {
+            return ex.getMessage();
+        }
+
+    }
+
+    public String reprintBoard(PrintStream out) {
+        printBoard(out);
+        return "";
     }
 
     public String help() {
         return """
                     redraw - redraws the current board
                     leave - leave the game
-                    makeMove <move> - moves your piece
+                    move <move> - moves your piece
                     resign - admit defeat and leave the game
                     highlight - shows all your legal moves
                     help - shows possible commands""";
     }
 
-
+    private void printPrompt() {
+        System.out.print("\n" + "GAME " + ">>> ");}
 
     public static final int BOARD_SIZE_IN_SQUARES = 8;
     public static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
