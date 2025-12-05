@@ -29,7 +29,7 @@ public class GameClient {
         printBoard(out);
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while(!result.equals("Logging out!")) {
+        while(!result.equals("Leaving!")) {
             printPrompt();
             String line = scanner.nextLine();
 
@@ -45,23 +45,18 @@ public class GameClient {
     }
 
     public String evaluate(String input) {
-        try {
-            String[] tokens = input.toLowerCase().split(" ");
-            String cmd = (tokens.length > 0) ? tokens[0] : "help";
-            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "help" -> help();
-                case "redraw" -> reprintBoard(out);
-                case "leave" -> "needs created";
-                case "move" -> "needs created";
-                case "resign" -> "needs created";
-                case "highlight" -> "needs created";
-                default -> "That's not a valid command, you silly goober";
-            };
-
-        } catch (ResponseException ex) {
-            return ex.getMessage();
-        }
+        String[] tokens = input.toLowerCase().split(" ");
+        String cmd = (tokens.length > 0) ? tokens[0] : "help";
+        String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        return switch (cmd) {
+            case "help" -> help();
+            case "redraw" -> reprintBoard(out);
+            case "leave" -> "Leaving!";
+            case "move" -> "needs created";
+            case "resign" -> "needs created";
+            case "highlight" -> "needs created";
+            default -> "That's not a valid command, you silly goober";
+        };
 
     }
 
