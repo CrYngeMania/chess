@@ -46,6 +46,8 @@ public class Server {
 
         server.put("game", this::joinGame);
 
+        server.delete("game", this::leaveGame);
+
         // Register your endpoints and exception handlers here.
 
     }
@@ -146,8 +148,24 @@ public class Server {
         catch (Exception ex){
             errors(ctx, serialiser, ex);
         }
-
     }
+
+    public void leaveGame(Context ctx) {
+        var serialiser = new Gson();
+        try {
+            var req = serialiser.fromJson(ctx.body(), LeaveGameRequest.class);
+            var token = ctx.header("Authorization");
+            var response = gameService.leaveGame(req, token);
+            ctx.result(serialiser.toJson(response));
+        }
+        catch (ResponseException ex){
+            dataErrors(ctx, serialiser, ex);
+        }
+        catch (Exception ex){
+            errors(ctx, serialiser, ex);
+        }
+    }
+
 
     public void listGames(Context ctx){
         var serialiser = new Gson();

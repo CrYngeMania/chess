@@ -70,6 +70,18 @@ public class ServerFacade {
         return result;
     }
 
+    public void leaveGame(Integer gameID) throws ResponseException {
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("gameID", gameID);
+        var httpRequest = buildRequest("DELETE", "/game", request);
+        var response = sendRequest(httpRequest);
+        HashMap<String, Object> result = handleResponse(response);
+        assert result != null;
+        if (result.containsKey("gameID") && result.get("gameID") instanceof Double d){
+            result.put("gameID", d.intValue());
+        }
+    }
+
     public HashMap<String, Object> createGame(String gameName) throws ResponseException {
         HashMap<String, Object> request = new HashMap<>();
         request.put("gameName", gameName);

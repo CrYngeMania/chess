@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import exception.ResponseException;
 import facade.ServerFacade;
 
@@ -18,6 +15,7 @@ public class GameClient {
     String playerType;
     ChessGame game;
     PrintStream out = new PrintStream(System.out, true);
+    Boolean gameComplete = false;
 
 
     public GameClient(ServerFacade server, String playerType, ChessGame game) {
@@ -45,7 +43,7 @@ public class GameClient {
         System.out.println();
     }
 
-    public String evaluate(String input) {
+    public String evaluate(String input) throws ResponseException {
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -54,13 +52,13 @@ public class GameClient {
                 case "help" -> help();
                 case "redraw" -> reprintBoard(out);
                 case "leave" -> "Leaving!";
-                case "move" -> "needs created";
+                case "move" -> makeMove(params);
                 case "resign" -> resign();
                 case "highlight" -> highlightBoard(out, params);
                 default -> "That's not a valid command, you silly goober";
             };
         }
-        catch (ResponseException ex) {
+        catch (ResponseException | InvalidMoveException ex) {
             return ex.getMessage();
         }
     }
@@ -99,19 +97,16 @@ public class GameClient {
                     leave - leave the game
                     move <move> - moves your piece
                     resign - admit defeat and leave the game
-                    highlight [move] - shows all your legal moves
+                    highlight <move> - shows all piece legal moves
                     help - shows possible commands""";
     }
-
-
-    /// Still needs to set a GAME COMPLETE flag
 
     public String resign() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Are you sure you want to resign? y/n\n");
         String answer = scanner.nextLine();
         if (Objects.equals(answer, "y")){
-            /// set game complete -> cannot make more moves
+            gameComplete = true;
             return "Better luck next time!";
         }
         else {
@@ -119,13 +114,28 @@ public class GameClient {
         }
     }
 
+    public String makeMove(String... params) throws ResponseException, InvalidMoveException {
+        if (Objects.equals(playerType, "OBSERVER")){
+            return "You can't make a move, you silly goober";
+        }
+        String startRowString = params[0].substring(0, 1);
+        int startRow = getColumn(startRowString);
+        int startCol = Integer.parseInt(params[0].substring(1));
+        ChessPosition start = new ChessPosition(startCol, startRow);
+        String endRowString = params[0].substring(0, 1);
+        int endRow = getColumn(endRowString);
+        int endCol = Integer.parseInt(params[0].substring(1));
+        ChessPosition end = new ChessPosition(endCol, endRow);
 
+        ChessMove move = new ChessMove(start, end, null);
+        game.makeMove(move);
+        return "";
+    }
 
     private void printPrompt() {
         System.out.print("\n" + "GAME " + ">>> ");}
 
     public static final int BOARD_SIZE_IN_SQUARES = 8;
-    public static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
 
     private void drawHeaders(PrintStream out) {
 
@@ -392,7 +402,6 @@ public class GameClient {
             }
         }
     }
-
 
     public void printBoard(PrintStream out, Collection<ChessMove> highlights){
         drawHeaders(out);

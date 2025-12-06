@@ -82,5 +82,39 @@ public class GameService {
         return new JoinGameResult();
     }
 
+    public GameData getGameData(GameData game, String username) throws ResponseException {
+        boolean updated = false;
+
+        String white = game.whiteUsername();
+        String black = game.blackUsername();
+
+        if (username.equals(white)){
+            white = null;
+            updated = true;
+        }
+        else if (username.equals(black)){
+            black = null;
+            updated = true;
+        }
+        if (!updated){
+            throw new ResponseException(ResponseException.Code.ClientError, "You aren't even in this game!");
+        }
+        return new GameData(game.gameID(), white, black, game.gameName(), game.game());
+    }
+
+    public JoinGameResult leaveGame(LeaveGameRequest request, String authToken) throws ResponseException{
+        authService.checkAuth(authToken);
+        AuthData currAuth = authDataAccess.getAuth(authToken);
+        String username = currAuth.username();
+
+        GameData game = gameDataAccess.getGame(request.gameID());
+        if (game == null) {
+            throw new ResponseException(ResponseException.Code.ClientError, " No game exists");
+        }
+        GameData update = getGameData(game, username);
+        gameDataAccess.updateGame(game.gameID(), update);
+
+        return new JoinGameResult();
+    }
 
 }
