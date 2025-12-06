@@ -52,7 +52,7 @@ public class GameClient {
                 case "help" -> help();
                 case "redraw" -> reprintBoard(out);
                 case "leave" -> "Leaving!";
-                case "move" -> makeMove(params);
+                case "move" -> makeMove(out, params);
                 case "resign" -> resign();
                 case "highlight" -> highlightBoard(out, params);
                 default -> "That's not a valid command, you silly goober";
@@ -114,7 +114,7 @@ public class GameClient {
         }
     }
 
-    public String makeMove(String... params) throws ResponseException, InvalidMoveException {
+    public String makeMove(PrintStream out, String... params) throws ResponseException, InvalidMoveException {
         if (Objects.equals(playerType, "OBSERVER")){
             return "You can't make a move, you silly goober";
         }
@@ -122,13 +122,14 @@ public class GameClient {
         int startRow = getColumn(startRowString);
         int startCol = Integer.parseInt(params[0].substring(1));
         ChessPosition start = new ChessPosition(startCol, startRow);
-        String endRowString = params[0].substring(0, 1);
+        String endRowString = params[1].substring(0, 1);
         int endRow = getColumn(endRowString);
-        int endCol = Integer.parseInt(params[0].substring(1));
+        int endCol = Integer.parseInt(params[1].substring(1));
         ChessPosition end = new ChessPosition(endCol, endRow);
 
         ChessMove move = new ChessMove(start, end, null);
         game.makeMove(move);
+        printBoard(out, null);
         return "";
     }
 
