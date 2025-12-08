@@ -1,6 +1,7 @@
 package client;
 
 import chess.*;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import facade.ServerFacade;
 
@@ -24,6 +25,10 @@ public class GameClient {
         this.game = game;
     }
 
+    /// Websocket
+
+
+    /// Running implementation
     public void run() {
         printBoard(out, null);
         Scanner scanner = new Scanner(System.in);
@@ -136,6 +141,7 @@ public class GameClient {
     private void printPrompt() {
         System.out.print("\n" + "GAME " + ">>> ");}
 
+    /// Draw Board functions
     public static final int BOARD_SIZE_IN_SQUARES = 8;
 
     private void drawHeaders(PrintStream out) {
