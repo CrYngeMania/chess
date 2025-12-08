@@ -1,10 +1,15 @@
 package client;
 
 import chess.*;
+import client.websocket.ServerMessageHandler;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import facade.ServerFacade;
-import facade.WebSocketFacade;
+import client.websocket.WebSocketFacade;
+import websocket.messages.ErrorMessage;
+import websocket.messages.GameNotificationMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -12,7 +17,7 @@ import java.util.*;
 import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
 
-public class GameClient {
+public class GameClient implements ServerMessageHandler{
     private final WebSocketFacade ws;
     private final ServerFacade server;
     String playerType;
@@ -20,10 +25,29 @@ public class GameClient {
     PrintStream out = new PrintStream(System.out, true);
     Boolean gameComplete = false;
 
+    @Override
+    public void notify(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> {
+                LoadGameMessage lgm = (LoadGameMessage) message;
+                this.game = new Gson().fromJson(lgm.getGame(), ChessGame.class);
+                printBoard(out, null);
+            }
+            case NOTIFICATION -> {
+                GameNotificationMessage gnm = (GameNotificationMessage) message;
+                System.out.print("Notification: " + gnm.getMessage());
+            }
+            case ERROR -> {
+                ErrorMessage em = (ErrorMessage) message;
+                System.out.print("Error: " + em.getErrorMessage());
+            }
+        }
+    }
+
 
     public GameClient(ServerFacade server, String playerType, ChessGame game) {
         try{
-            this.ws = new WebSocketFacade("http://localhost:8081");
+            this.ws = new WebSocketFacade("http://localhost:8081", this);
         } catch (ResponseException e) {
             throw new RuntimeException(e);
         }

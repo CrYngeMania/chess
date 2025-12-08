@@ -1,4 +1,4 @@
-package facade;
+package client.websocket;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
@@ -6,6 +6,9 @@ import exception.ResponseException;
 import jakarta.websocket.*;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.GameNotificationMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -14,14 +17,12 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
-    Session session;
-    ServerMessage message;
+    private Session session;
 
-    public WebSocketFacade(String url, ServerMessage message) throws ResponseException {
+    public WebSocketFacade(String url, ServerMessageHandler handler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.message = message;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -31,7 +32,20 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    ///notificationHandler.notify(notification);
+                    switch(notification.getServerMessageType()){
+                        case ERROR -> {
+                            ErrorMessage notif = new Gson().fromJson(message, ErrorMessage.class);
+                            handler.notify(notif);
+                        }
+                        case LOAD_GAME -> {
+                            LoadGameMessage notif = new Gson().fromJson(message, LoadGameMessage.class);
+                            handler.notify(notif);
+                        }
+                        case NOTIFICATION -> {
+                            GameNotificationMessage notif = new Gson().fromJson(message, GameNotificationMessage.class);
+                            handler.notify(notif);
+                        }
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
