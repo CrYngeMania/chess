@@ -4,6 +4,7 @@ import chess.*;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import facade.ServerFacade;
+import facade.WebSocketFacade;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -12,6 +13,7 @@ import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
 
 public class GameClient {
+    private final WebSocketFacade ws;
     private final ServerFacade server;
     String playerType;
     ChessGame game;
@@ -20,6 +22,11 @@ public class GameClient {
 
 
     public GameClient(ServerFacade server, String playerType, ChessGame game) {
+        try{
+            this.ws = new WebSocketFacade("http://localhost:8081");
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
         this.server = server;
         this.playerType = playerType;
         this.game = game;

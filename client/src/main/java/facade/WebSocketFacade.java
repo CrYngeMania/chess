@@ -1,4 +1,4 @@
-package client;
+package facade;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
@@ -55,7 +55,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void makeMove(String authToken, Integer gameID, ChessMove move) throws ResponseException {
         try{
-            var action = new MakeMoveCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, move);
+            var action = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         }catch(IOException ex){
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
