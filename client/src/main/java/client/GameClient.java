@@ -29,6 +29,7 @@ public class GameClient implements ServerMessageHandler{
 
     @Override
     public void notify(ServerMessage message) {
+        System.out.print(message);
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
                 LoadGameMessage lgm = (LoadGameMessage) message;

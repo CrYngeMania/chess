@@ -53,11 +53,24 @@ public class Server {
         server.delete("game", this::leaveGame);
 
         server.ws("/ws", ws -> {
-            ws.onConnect(handler);
-            ws.onMessage(handler);
-            ws.onClose(handler);
-        }
-        );
+            ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.out.println("Websocket connected");
+            });
+            ws.onMessage(ctx -> {
+                System.out.println("message received");
+                ctx.send("WebSocket response:" + ctx.message());
+                System.out.println("message sent");
+            });
+            ws.onClose(_ -> System.out.println("Websocket closed"));
+        });
+
+//        server.ws("/ws", ws -> {
+//            ws.onConnect(handler);
+//            ws.onMessage(handler);
+//            ws.onClose(handler);
+//        })
+        ;
 
         // Register your endpoints and exception handlers here.
 

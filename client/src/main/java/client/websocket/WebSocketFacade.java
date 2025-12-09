@@ -22,15 +22,20 @@ public class WebSocketFacade extends Endpoint {
     private final String url;
 
     public WebSocketFacade(String url, ServerMessageHandler handler) throws ResponseException {
+        System.out.println("reaching init");
+
         this.handler = handler;
         this.url = url.replace("http", "ws");
         try {
+            System.out.println("Hitting try block");
             URI socketURI = new URI(this.url + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
+            System.out.println("before message handler");
             this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+                System.out.println("message received");
                 ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                 handler.notify(serverMessage);
             });

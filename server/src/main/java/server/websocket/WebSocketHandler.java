@@ -44,6 +44,7 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
         Session session = ctx.session;
         Gson gson = new Gson();
         try{
+            System.out.println(ctx.message());
             UserGameCommand command = gson.fromJson(ctx.message(), UserGameCommand.class);
 
             switch(command.getCommandType()){
@@ -53,6 +54,7 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
                 case RESIGN -> resign(command.getAuthToken(), command.getGameID(), ctx.session);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             var err = new ErrorMessage("Error: " + e.getMessage());
             ctx.session.getRemote().sendString(gson.toJson(err));
         }

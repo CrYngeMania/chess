@@ -27,8 +27,13 @@ public class ConnectionManager {
     }
 
     public void broadcast(Integer gameID, Session excludeSession, ServerMessage notification) throws IOException {
+        System.out.println("Reaching broadcast!");
+
         var gameSessions = connections.get(gameID);
-        if (gameSessions == null) return;
+        if (gameSessions == null) {
+            System.out.println("Games are null!");
+            return;
+        }
 
         String msg = new Gson().toJson(notification);
         for (Session c : gameSessions.values()) {
