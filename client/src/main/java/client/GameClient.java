@@ -37,11 +37,11 @@ public class GameClient implements ServerMessageHandler{
             }
             case NOTIFICATION -> {
                 GameNotificationMessage gnm = (GameNotificationMessage) message;
-                System.out.print("Notification: " + gnm.getMessage());
+                System.out.println("Notification: " + gnm.getMessage());
             }
             case ERROR -> {
                 ErrorMessage em = (ErrorMessage) message;
-                System.out.print("Error: " + em.getErrorMessage());
+                System.out.println("Error: " + em.getErrorMessage());
             }
         }
     }
@@ -63,7 +63,6 @@ public class GameClient implements ServerMessageHandler{
     /// Running implementation
     public void run() throws ResponseException {
         try{
-
             ws.connect(authToken, gameID);
         } catch (ResponseException e) {
             throw new RuntimeException(e.getMessage());
@@ -176,7 +175,7 @@ public class GameClient implements ServerMessageHandler{
         ChessPiece piece = game.getBoard().getPiece(start);
         if (piece.getPieceType() == PieceType.PAWN && (endRow == 8 || endRow == 1)){
             Scanner scanner = new Scanner(System.in);
-            System.out.print("Promote to: (first letter)");
+            System.out.print("Promote to: (first letter) ");
             String answer = scanner.nextLine();
             switch (answer.toLowerCase()){
                 case "b" ->
@@ -199,8 +198,8 @@ public class GameClient implements ServerMessageHandler{
         }
 
         ws.makeMove(authToken, gameID, move);
-        game.makeMove(move);
-        printBoard(out, null);
+        ///game.makeMove(move);
+        ///printBoard(out, null);
         return "";
     }
 

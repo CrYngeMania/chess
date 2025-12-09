@@ -18,36 +18,23 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint {
 
     private Session session;
+    private final ServerMessageHandler handler;
+    private final String url;
 
     public WebSocketFacade(String url, ServerMessageHandler handler) throws ResponseException {
+        this.handler = handler;
+        this.url = url.replace("http", "ws");
         try {
-            url = url.replace("http", "ws");
-            URI socketURI = new URI(url + "/ws");
+            URI socketURI = new URI(this.url + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            //set message handler
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
-                public void onMessage(String message) {
-                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    switch(notification.getServerMessageType()){
-                        case ERROR -> {
-                            ErrorMessage notif = new Gson().fromJson(message, ErrorMessage.class);
-                            handler.notify(notif);
-                        }
-                        case LOAD_GAME -> {
-                            LoadGameMessage notif = new Gson().fromJson(message, LoadGameMessage.class);
-                            handler.notify(notif);
-                        }
-                        case NOTIFICATION -> {
-                            GameNotificationMessage notif = new Gson().fromJson(message, GameNotificationMessage.class);
-                            handler.notify(notif);
-                        }
-                    }
-                }
+            this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
+                ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                handler.notify(serverMessage);
             });
+
         } catch (DeploymentException | IOException | URISyntaxException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
