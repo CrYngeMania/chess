@@ -49,7 +49,9 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
 
             switch(command.getCommandType()){
                 case CONNECT -> connect(command.getAuthToken(), command.getGameID(), ctx.session);
-                case MAKE_MOVE -> makeMove(command.getAuthToken(),command, ctx.session);
+                case MAKE_MOVE -> { MakeMoveCommand moveCommand = gson.fromJson(ctx.message(), MakeMoveCommand.class);
+                    makeMove(moveCommand.getAuthToken(),moveCommand, ctx.session);
+                }
                 case LEAVE -> leave(command.getAuthToken(), command.getGameID(), ctx.session);
                 case RESIGN -> resign(command.getAuthToken(), command.getGameID(), ctx.session);
             }
@@ -65,11 +67,9 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
 
     }
 
-    public void makeMove(String authToken, UserGameCommand command, Session session) throws IOException, ResponseException, InvalidMoveException {
+    public void makeMove(String authToken, MakeMoveCommand moveCommand, Session session) throws IOException, ResponseException, InvalidMoveException {
         String username = getUsername(authToken);
-        int gameID = command.getGameID();
-
-        MakeMoveCommand moveCommand = (MakeMoveCommand) command;
+        int gameID = moveCommand.getGameID();
 
         GameData game = new MySqlGameDataAccess().getGame(gameID);
         game.game().makeMove(moveCommand.getMove());

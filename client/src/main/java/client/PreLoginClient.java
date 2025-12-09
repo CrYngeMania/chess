@@ -9,8 +9,10 @@ import java.util.Scanner;
 
 public class PreLoginClient {
     private final ServerFacade server;
+    private final String url;
 
     public PreLoginClient(String url) {
+        this.url = url;
         server = new ServerFacade(url);
     }
 
@@ -89,7 +91,7 @@ public class PreLoginClient {
     }
 
     private void runPost() {
-        PostLoginClient client = new PostLoginClient(server);
+        PostLoginClient client = new PostLoginClient(server, url);
         client.run();
     }
 

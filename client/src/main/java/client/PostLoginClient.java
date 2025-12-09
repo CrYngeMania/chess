@@ -10,8 +10,10 @@ import java.util.*;
 public class PostLoginClient {
     private final ServerFacade server;
     private List<Map<String, Object>> currentGames;
+    private final String url;
 
-    public PostLoginClient(ServerFacade server) {
+    public PostLoginClient(ServerFacade server, String url) {
+        this.url = url;
         this.server = server;
         currentGames = new ArrayList<>();
     }
@@ -177,7 +179,7 @@ public class PostLoginClient {
     }
 
     private void runGame(String playerType, ChessGame game, Integer gameID) {
-        GameClient client = new GameClient(server, playerType, game, gameID);
+        GameClient client = new GameClient(server, playerType, game, gameID, url);
         try{
             client.run();
         } catch (ResponseException e) {

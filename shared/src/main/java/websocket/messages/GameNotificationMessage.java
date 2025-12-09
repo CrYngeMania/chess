@@ -1,15 +1,15 @@
 package websocket.messages;
 
 public class GameNotificationMessage extends ServerMessage {
-    private final String gameMessage;
+    private final String message;
 
-    public GameNotificationMessage(String gameMessage) {
+    public GameNotificationMessage(String message) {
         super(ServerMessage.ServerMessageType.NOTIFICATION);
-        this.gameMessage = gameMessage;
+        this.message = message;
     }
 
 
     public String getMessage() {
-        return gameMessage;
+        return message;
     }
 }

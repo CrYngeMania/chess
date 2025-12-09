@@ -6,9 +6,6 @@ import exception.ResponseException;
 import jakarta.websocket.*;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessage;
-import websocket.messages.GameNotificationMessage;
-import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -17,27 +14,28 @@ import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint {
 
-    private Session session;
-    private final ServerMessageHandler handler;
-    private final String url;
+    private final Session session;
 
     public WebSocketFacade(String url, ServerMessageHandler handler) throws ResponseException {
         System.out.println("reaching init");
 
-        this.handler = handler;
-        this.url = url.replace("http", "ws");
+        String url1 = url.replace("http", "ws");
         try {
             System.out.println("Hitting try block");
-            URI socketURI = new URI(this.url + "/ws");
+            URI socketURI = new URI(url1 + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
             System.out.println("before message handler");
-            this.session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-                System.out.println("message received");
-                ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                handler.notify(serverMessage);
+
+            this.session.addMessageHandler( new MessageHandler.Whole<String>() {
+                @Override
+                public void onMessage(String message){
+                    System.out.println("message received");
+                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
+                    handler.notify(serverMessage);
+                }
             });
 
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -56,7 +54,6 @@ public class WebSocketFacade extends Endpoint {
         }catch(IOException ex){
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
-
     }
 
     public void makeMove(String authToken, Integer gameID, ChessMove move) throws ResponseException {

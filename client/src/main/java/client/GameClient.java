@@ -48,9 +48,9 @@ public class GameClient implements ServerMessageHandler{
     }
 
 
-    public GameClient(ServerFacade server, String playerType, ChessGame game, Integer gameID) {
+    public GameClient(ServerFacade server, String playerType, ChessGame game, Integer gameID, String url) {
         try{
-            this.ws = new WebSocketFacade("http://localhost:8081", this);
+            this.ws = new WebSocketFacade(url, this);
         } catch (ResponseException e) {
             throw new RuntimeException(e);
         }
