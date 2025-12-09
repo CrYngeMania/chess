@@ -6,6 +6,7 @@ import dataaccess.*;
 import exception.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
+import server.websocket.WebSocketHandler;
 import service.GameService;
 import service.UserService;
 
@@ -14,12 +15,15 @@ public class Server {
     private final Javalin server;
     private final UserService userService;
     private final GameService gameService;
+    private final WebSocketHandler handler;
 
     public Server() {
 
         MySqlUserDataAccess dataAccess = new MySqlUserDataAccess();
         GameDataAccess gameDataAccess = new MySqlGameDataAccess();
         AuthDataAccess authDataAccess = new MySqlAuthDataAccess();
+
+        this.handler = new WebSocketHandler();
 
         try {
             dataAccess.configureDatabase();
@@ -47,6 +51,13 @@ public class Server {
         server.put("game", this::joinGame);
 
         server.delete("game", this::leaveGame);
+
+        server.ws("/ws", ws -> {
+            ws.onConnect(handler);
+            ws.onMessage(handler);
+            ws.onClose(handler);
+        }
+        );
 
         // Register your endpoints and exception handlers here.
 

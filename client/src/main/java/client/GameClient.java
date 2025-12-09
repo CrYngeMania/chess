@@ -24,6 +24,8 @@ public class GameClient implements ServerMessageHandler{
     ChessGame game;
     PrintStream out = new PrintStream(System.out, true);
     Boolean gameComplete = false;
+    String authToken;
+    Integer gameID;
 
     @Override
     public void notify(ServerMessage message) {
@@ -45,7 +47,7 @@ public class GameClient implements ServerMessageHandler{
     }
 
 
-    public GameClient(ServerFacade server, String playerType, ChessGame game) {
+    public GameClient(ServerFacade server, String playerType, ChessGame game, Integer gameID) {
         try{
             this.ws = new WebSocketFacade("http://localhost:8081", this);
         } catch (ResponseException e) {
@@ -54,14 +56,18 @@ public class GameClient implements ServerMessageHandler{
         this.server = server;
         this.playerType = playerType;
         this.game = game;
+        this.authToken = server.getAuth();
+        this.gameID = gameID;
     }
 
-    /// Websocket
-
-
     /// Running implementation
-    public void run() {
-        printBoard(out, null);
+    public void run() throws ResponseException {
+        try{
+
+            ws.connect(authToken, gameID);
+        } catch (ResponseException e) {
+            throw new RuntimeException(e.getMessage());
+        }
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while(!result.equals("Leaving!")) {
@@ -77,6 +83,7 @@ public class GameClient implements ServerMessageHandler{
             }
         }
         System.out.println();
+        ws.leaveGame(authToken, gameID);
     }
 
     public String evaluate(String input) throws ResponseException {
@@ -137,12 +144,13 @@ public class GameClient implements ServerMessageHandler{
                     help - shows possible commands""";
     }
 
-    public String resign() {
+    public String resign() throws ResponseException {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Are you sure you want to resign? y/n\n");
         String answer = scanner.nextLine();
         if (Objects.equals(answer, "y")){
             gameComplete = true;
+            ws.resign(authToken, gameID);
             return "Better luck next time!";
         }
         else {
@@ -154,16 +162,43 @@ public class GameClient implements ServerMessageHandler{
         if (Objects.equals(playerType, "OBSERVER")){
             return "You can't make a move, you silly goober";
         }
+
         String startRowString = params[0].substring(0, 1);
         int startRow = getColumn(startRowString);
         int startCol = Integer.parseInt(params[0].substring(1));
         ChessPosition start = new ChessPosition(startCol, startRow);
+
         String endRowString = params[1].substring(0, 1);
         int endRow = getColumn(endRowString);
         int endCol = Integer.parseInt(params[1].substring(1));
         ChessPosition end = new ChessPosition(endCol, endRow);
-
         ChessMove move = new ChessMove(start, end, null);
+        ChessPiece piece = game.getBoard().getPiece(start);
+        if (piece.getPieceType() == PieceType.PAWN && (endRow == 8 || endRow == 1)){
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Promote to: (first letter)");
+            String answer = scanner.nextLine();
+            switch (answer.toLowerCase()){
+                case "b" ->
+                {
+                    move = new ChessMove(start, end, PieceType.BISHOP);
+                }
+                case "r" ->
+                {
+                    move = new ChessMove(start, end, PieceType.ROOK);
+                }
+                case "k" ->
+                {
+                    move = new ChessMove(start, end, PieceType.KNIGHT);
+                }
+                case "q" ->
+                {
+                    move = new ChessMove(start, end, PieceType.QUEEN);
+                }
+            }
+        }
+
+        ws.makeMove(authToken, gameID, move);
         game.makeMove(move);
         printBoard(out, null);
         return "";

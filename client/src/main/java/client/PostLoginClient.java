@@ -143,7 +143,7 @@ public class PostLoginClient {
                 var wantedGame = currentGames.get(gameNumber - 1);
                 int gameID = (Integer) wantedGame.get("gameID");
                 server.joinGame(playerColor, gameID);
-                runGame(playerColor, (ChessGame) wantedGame.get("game"));
+                runGame(playerColor, (ChessGame) wantedGame.get("game"), gameID);
 
                 server.leaveGame(gameID);
 
@@ -169,15 +169,21 @@ public class PostLoginClient {
             }
 
             var wantedGame = currentGames.get(gameNumber - 1);
-            runGame("OBSERVER", (ChessGame) wantedGame.get("game"));
+            int gameID = (Integer) wantedGame.get("gameID");
+            runGame("OBSERVER", (ChessGame) wantedGame.get("game"), gameID);
             return "";
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <ID>");
     }
 
-    private void runGame(String playerType, ChessGame game) {
-        GameClient client = new GameClient(server, playerType, game);
-        client.run();
+    private void runGame(String playerType, ChessGame game, Integer gameID) {
+        GameClient client = new GameClient(server, playerType, game, gameID);
+        try{
+            client.run();
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public String logout() throws ResponseException{
