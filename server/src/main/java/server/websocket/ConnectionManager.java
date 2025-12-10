@@ -27,11 +27,9 @@ public class ConnectionManager {
     }
 
     public void broadcast(Integer gameID, Session excludeSession, ServerMessage notification) throws IOException {
-        System.out.println("Reaching broadcast!");
 
         var gameSessions = connections.get(gameID);
         if (gameSessions == null) {
-            System.out.println("Games are null!");
             return;
         }
 

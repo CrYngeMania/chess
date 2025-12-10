@@ -3,6 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -19,6 +20,16 @@ public class ChessGame {
         gameboard.resetBoard();
         teamTurn = TeamColor.WHITE;
         lastMove = null;
+    }
+
+    private TeamColor resignedPlayer = null;
+
+    public void resign(TeamColor color){
+        resignedPlayer = color;
+    }
+
+    public boolean hasResigned(){
+        return resignedPlayer != null;
     }
 
     /**

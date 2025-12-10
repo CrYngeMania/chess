@@ -160,25 +160,6 @@ public class GameClient implements ServerMessageHandler{
     }
 
     public String makeMove(String... params) throws ResponseException, InvalidMoveException {
-        if (gameComplete){
-            return "The game's done! You can go home now :)";
-        }
-
-        if (Objects.equals(playerType, "OBSERVER")){
-            return "You can't make a move, you silly goober";
-        }
-        ChessGame.TeamColor current = game.getTeamTurn();
-        ChessGame.TeamColor player;
-        if (Objects.equals(playerType, "BLACK")){
-            player = ChessGame.TeamColor.BLACK;
-        }
-        else{
-            player = ChessGame.TeamColor.WHITE;
-        }
-
-        if (!player.equals(current)){
-            return "Hey! You! Not your turn!";
-        }
 
         String startRowString = params[0].substring(0, 1);
         int startRow = getColumn(startRowString);

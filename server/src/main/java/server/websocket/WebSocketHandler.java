@@ -25,6 +25,8 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
     AuthDataAccess authDAO = new MySqlAuthDataAccess();
     GameDataAccess gameDAO = new MySqlGameDataAccess();
 
+    WsMessageContext context;
+
 
     private final ConnectionManager connections = new ConnectionManager();
 
@@ -41,9 +43,9 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
 
     @Override
     public void handleMessage(@NotNull WsMessageContext ctx) throws Exception {
+        context = ctx;
         Gson gson = new Gson();
         try{
-            System.out.println(ctx.message());
             UserGameCommand command = gson.fromJson(ctx.message(), UserGameCommand.class);
 
             switch(command.getCommandType()){
@@ -65,48 +67,126 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
         int gameID = moveCommand.getGameID();
         ChessGame.TeamColor color;
 
-        GameData game = new MySqlGameDataAccess().getGame(gameID);
-        ChessGame newGame = game.game();
-        newGame.makeMove(moveCommand.getMove());
-        GameData newGameData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), newGame);
-        gameDAO.updateGame(game.gameID(), newGameData);
+        ChessGame.TeamColor player;
 
+        GameData game = new MySqlGameDataAccess().getGame(gameID);
+
+        if (Objects.equals(username, game.whiteUsername())){
+            player = ChessGame.TeamColor.WHITE;
+        }
+        else if (Objects.equals(username, game.blackUsername())) {
+            player = ChessGame.TeamColor.BLACK;
+        }
+        else{
+            ErrorMessage msg = new ErrorMessage("You aren't even playing!");
+            context.session.getRemote().sendString(new Gson().toJson(msg));
+            return;
+        }
 
         if (Objects.equals(username, game.blackUsername())){
             color = ChessGame.TeamColor.WHITE;
         }
         else{color = ChessGame.TeamColor.BLACK;}
 
-        LoadGameMessage update = new LoadGameMessage(game.game());
-        connections.broadcast(gameID, null, update);
+        if (game.game().isInCheckmate(color) || game.game().isInStalemate(color)){
+            ErrorMessage msg = new ErrorMessage("The game's done! You can go home now :)");
+            context.session.getRemote().sendString(new Gson().toJson(msg));
+            return;
+        }
 
-        if (game.game().isInCheckmate(color)){
-            var message = String.format("%s wins! What a champ!", username);
-            var notification = new GameNotificationMessage(message);
-            connections.broadcast(gameID, null, notification);
+
+        if (!Objects.equals(player, game.game().getTeamTurn())){
+            ErrorMessage msg = new ErrorMessage("Hey! Not your turn, buddy boy");
+            context.session.getRemote().sendString(new Gson().toJson(msg));
         }
-        else if(game.game().isInStalemate(color)){
-            var message = "Oh dear..... looks like a stalemate :(";
-            var notification = new GameNotificationMessage(message);
-            connections.broadcast(gameID, null, notification);
-        }
+
         else{
-            var message = String.format("%s made a move!", username);
-            var notification = new GameNotificationMessage(message);
-            connections.broadcast(gameID, session, notification);
+            ChessGame newGame = game.game();
+
+            if (game.game().hasResigned()){
+                ErrorMessage msg = new ErrorMessage("The game's over, pal :/");
+                context.session.getRemote().sendString(new Gson().toJson(msg));
+                return;
+            }
+
+            if (game.game().isInCheckmate(color)){
+                var message = String.format("%s wins! What a champ!", username);
+                var notification = new GameNotificationMessage(message);
+                connections.broadcast(gameID, null, notification);
+            }
+
+            newGame.makeMove(moveCommand.getMove());
+            GameData newGameData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), newGame);
+            gameDAO.updateGame(game.gameID(), newGameData);
+
+            LoadGameMessage update = new LoadGameMessage(game.game());
+            connections.broadcast(gameID, null, update);
+
+            var initMessage = String.format("%s made a move!", username);
+            var initNotification = new GameNotificationMessage(initMessage);
+            connections.broadcast(gameID, session, initNotification);
+
+            if (game.game().isInCheckmate(color)){
+                var message = String.format("%s wins! What a champ!", username);
+                var notification = new GameNotificationMessage(message);
+                connections.broadcast(gameID, null, notification);
+            }
+            else if(game.game().isInStalemate(color)){
+                var message = "Oh dear..... looks like a stalemate :(";
+                var notification = new GameNotificationMessage(message);
+                connections.broadcast(gameID, null, notification);
+            }
         }
+
     }
 
-    public void resign(String authToken, Integer gameID, Session session) throws IOException {
+    public void resign(String authToken, Integer gameID, Session session) throws IOException, ResponseException {
         String username = getUsername(authToken);
+        ChessGame.TeamColor color;
+
+        GameData game = new MySqlGameDataAccess().getGame(gameID);
+
+        if (game.game().hasResigned()){
+            ErrorMessage msg = new ErrorMessage("Someone already resigned, you silly goober");
+            context.session.getRemote().sendString(new Gson().toJson(msg));
+            return;
+        }
+
+        if (Objects.equals(username, game.blackUsername())){
+            color = ChessGame.TeamColor.BLACK;
+        }
+        else if (Objects.equals(username, game.whiteUsername())){
+        color = ChessGame.TeamColor.WHITE;}
+        else{
+            color = null;
+            ErrorMessage msg = new ErrorMessage("You aren't even in this game!");
+            context.session.getRemote().sendString(new Gson().toJson(msg));
+            return;
+        }
+
+        ChessGame newGame = game.game();
+        newGame.resign(color);
+        GameData newGameData = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), newGame);
+        gameDAO.updateGame(game.gameID(), newGameData);
+
 
         var message = String.format("%s resigned!", username);
         var notification = new GameNotificationMessage(message);
-        connections.broadcast(gameID, session, notification);
+        connections.broadcast(gameID, null, notification);
     }
 
-    public void leave(String authToken, Integer gameID, Session session) throws IOException {
+    public void leave(String authToken, Integer gameID, Session session) throws IOException, ResponseException {
         String username = getUsername(authToken);
+
+        GameData game = gameDAO.getGame(gameID);
+
+        if (Objects.equals(username, game.whiteUsername())) {
+            game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+        } else if (Objects.equals(username, game.blackUsername())) {
+            game = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+        }
+
+        gameDAO.updateGame(gameID, game);
 
         var message = String.format("%s left the game!", username);
         var notification = new GameNotificationMessage(message);
