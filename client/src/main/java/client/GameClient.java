@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import facade.ServerFacade;
 import client.websocket.WebSocketFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import websocket.messages.ErrorMessage;
 import websocket.messages.GameNotificationMessage;
 import websocket.messages.LoadGameMessage;
@@ -18,6 +20,7 @@ import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
 
 public class GameClient implements ServerMessageHandler{
+    private static final Logger log = LoggerFactory.getLogger(GameClient.class);
     private final WebSocketFacade ws;
     String playerType;
     ChessGame game;
@@ -71,19 +74,17 @@ public class GameClient implements ServerMessageHandler{
             throw new RuntimeException(e.getMessage());
         }
         Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while(!result.equals("Leaving!")) {
+        var output = "";
+        do {
             printPrompt();
-            String line = scanner.nextLine();
-
+            String inputLine = scanner.nextLine();
             try {
-                result = evaluate(line);
-                System.out.print(result);
-            } catch (Throwable e){
-                var msg = e.toString();
-                System.out.print(msg);
+                output = evaluate(inputLine);
+                System.out.print(output);
+            } catch (Throwable e) {
+                log.error(String.valueOf(e));
             }
-        }
+        } while (!output.equals("Leaving!"));
         System.out.println();
         ws.leaveGame(authToken, gameID);
     }
