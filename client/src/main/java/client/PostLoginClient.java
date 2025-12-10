@@ -20,11 +20,10 @@ public class PostLoginClient {
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        var result = "";
+        String result = "";
         while(!result.equals("Logging out!")) {
             printPrompt();
             String line = scanner.nextLine();
-
             try {
                 result = evaluate(line);
                 System.out.print(result);

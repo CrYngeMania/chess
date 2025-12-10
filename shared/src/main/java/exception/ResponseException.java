@@ -3,7 +3,6 @@ package exception;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class ResponseException extends Exception {
 
@@ -57,7 +56,6 @@ public class ResponseException extends Exception {
     public static Code fromHttpStatusCode(int httpStatusCode) {
         return switch (httpStatusCode) {
             case 500 -> Code.ServerError;
-            case 400 -> Code.ClientError;
             case 403 -> Code.TakenError;
             case 401 -> Code.UnauthorisedError;
             default -> Code.ClientError;
