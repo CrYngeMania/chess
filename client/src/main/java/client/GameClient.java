@@ -20,7 +20,7 @@ import static chess.ChessPiece.*;
 import static ui.EscapeSequences.*;
 
 public class GameClient implements ServerMessageHandler{
-    private static final Logger log = LoggerFactory.getLogger(GameClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GameClient.class);
     private final WebSocketFacade ws;
     String playerType;
     ChessGame game;
@@ -82,7 +82,7 @@ public class GameClient implements ServerMessageHandler{
                 output = evaluate(inputLine);
                 System.out.print(output);
             } catch (Throwable e) {
-                log.error(String.valueOf(e));
+                LOG.error(String.valueOf(e));
             }
         } while (!output.equals("Leaving!"));
         System.out.println();
