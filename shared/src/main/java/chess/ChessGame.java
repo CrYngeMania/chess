@@ -153,10 +153,10 @@ public class ChessGame {
         else{
             throw new InvalidMoveException("Not a valid move.");
         }
-        if (piece.getTeamColor() == TeamColor.BLACK){
+        if (teamTurn == TeamColor.BLACK){
             setTeamTurn(TeamColor.WHITE);
         }
-        else if (piece.getTeamColor() == TeamColor.WHITE){
+        else if (teamTurn == TeamColor.WHITE){
             setTeamTurn(TeamColor.BLACK);
         }
         lastMove = move;

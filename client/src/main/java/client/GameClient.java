@@ -19,7 +19,6 @@ import static ui.EscapeSequences.*;
 
 public class GameClient implements ServerMessageHandler{
     private final WebSocketFacade ws;
-    private final ServerFacade server;
     String playerType;
     ChessGame game;
     PrintStream out = new PrintStream(System.out, true);
@@ -28,25 +27,28 @@ public class GameClient implements ServerMessageHandler{
     Integer gameID;
 
     @Override
-    public void notify(ServerMessage message) {
-        System.out.print(message);
-        switch (message.getServerMessageType()) {
+    public void notify(String message) {
+        Gson serialiser = new Gson();
+        ServerMessage msg = serialiser.fromJson(message, ServerMessage.class);
+        switch (msg.getServerMessageType()) {
             case LOAD_GAME -> {
-                LoadGameMessage lgm = (LoadGameMessage) message;
-                this.game = new Gson().fromJson(lgm.getGame(), ChessGame.class);
+                LoadGameMessage lgm = serialiser.fromJson(message, LoadGameMessage.class);
+                game = lgm.getGame();
                 printBoard(out, null);
+                printPrompt();
             }
             case NOTIFICATION -> {
-                GameNotificationMessage gnm = (GameNotificationMessage) message;
+                GameNotificationMessage gnm = serialiser.fromJson(message, GameNotificationMessage.class);
                 System.out.println("Notification: " + gnm.getMessage());
+                printPrompt();
             }
             case ERROR -> {
-                ErrorMessage em = (ErrorMessage) message;
-                System.out.println("Error: " + em.getErrorMessage());
+                ErrorMessage em = serialiser.fromJson(message, ErrorMessage.class);
+                System.out.println(em.getErrorMessage());
+                printPrompt();
             }
         }
     }
-
 
     public GameClient(ServerFacade server, String playerType, ChessGame game, Integer gameID, String url) {
         try{
@@ -54,7 +56,6 @@ public class GameClient implements ServerMessageHandler{
         } catch (ResponseException e) {
             throw new RuntimeException(e);
         }
-        this.server = server;
         this.playerType = playerType;
         this.game = game;
         this.authToken = server.getAuth();
@@ -86,7 +87,7 @@ public class GameClient implements ServerMessageHandler{
         ws.leaveGame(authToken, gameID);
     }
 
-    public String evaluate(String input) throws ResponseException {
+    public String evaluate(String input) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -95,7 +96,7 @@ public class GameClient implements ServerMessageHandler{
                 case "help" -> help();
                 case "redraw" -> reprintBoard(out);
                 case "leave" -> "Leaving!";
-                case "move" -> makeMove(out, params);
+                case "move" -> makeMove(params);
                 case "resign" -> resign();
                 case "highlight" -> highlightBoard(out, params);
                 default -> "That's not a valid command, you silly goober";
@@ -158,9 +159,25 @@ public class GameClient implements ServerMessageHandler{
         }
     }
 
-    public String makeMove(PrintStream out, String... params) throws ResponseException, InvalidMoveException {
+    public String makeMove(String... params) throws ResponseException, InvalidMoveException {
+        if (gameComplete){
+            return "The game's done! You can go home now :)";
+        }
+
         if (Objects.equals(playerType, "OBSERVER")){
             return "You can't make a move, you silly goober";
+        }
+        ChessGame.TeamColor current = game.getTeamTurn();
+        ChessGame.TeamColor player;
+        if (Objects.equals(playerType, "BLACK")){
+            player = ChessGame.TeamColor.BLACK;
+        }
+        else{
+            player = ChessGame.TeamColor.WHITE;
+        }
+
+        if (!player.equals(current)){
+            return "Hey! You! Not your turn!";
         }
 
         String startRowString = params[0].substring(0, 1);
@@ -180,27 +197,29 @@ public class GameClient implements ServerMessageHandler{
             String answer = scanner.nextLine();
             switch (answer.toLowerCase()){
                 case "b" ->
-                {
+
                     move = new ChessMove(start, end, PieceType.BISHOP);
-                }
+
                 case "r" ->
-                {
+
                     move = new ChessMove(start, end, PieceType.ROOK);
-                }
+
                 case "k" ->
-                {
+
                     move = new ChessMove(start, end, PieceType.KNIGHT);
-                }
+
                 case "q" ->
-                {
+
                     move = new ChessMove(start, end, PieceType.QUEEN);
-                }
+
             }
         }
 
         ws.makeMove(authToken, gameID, move);
-        ///game.makeMove(move);
-        ///printBoard(out, null);
+
+        if (game.isInCheckmate(ChessGame.TeamColor.BLACK) || game.isInCheckmate(ChessGame.TeamColor.WHITE)){
+            gameComplete = true;
+        }
         return "";
     }
 
@@ -247,7 +266,7 @@ public class GameClient implements ServerMessageHandler{
 
     private void drawRowOfSquares(PrintStream out, int boardRow, Collection<ChessMove> highlights) {
 
-        int displayRow = BOARD_SIZE_IN_SQUARES - boardRow;;
+        int displayRow = BOARD_SIZE_IN_SQUARES - boardRow;
         if (Objects.equals("BLACK", playerType)) {
             displayRow = 1 + boardRow;
         }

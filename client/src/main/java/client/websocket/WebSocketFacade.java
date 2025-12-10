@@ -6,7 +6,6 @@ import exception.ResponseException;
 import jakarta.websocket.*;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,24 +16,17 @@ public class WebSocketFacade extends Endpoint {
     private final Session session;
 
     public WebSocketFacade(String url, ServerMessageHandler handler) throws ResponseException {
-        System.out.println("reaching init");
-
         String url1 = url.replace("http", "ws");
         try {
-            System.out.println("Hitting try block");
             URI socketURI = new URI(url1 + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            System.out.println("before message handler");
-
             this.session.addMessageHandler( new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message){
-                    System.out.println("message received");
-                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                    handler.notify(serverMessage);
+                    handler.notify(message);
                 }
             });
 

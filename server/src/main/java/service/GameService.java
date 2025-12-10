@@ -71,7 +71,7 @@ public class GameService {
             GameData newGame = new GameData(request.gameID(), currAuth.username(), game.blackUsername(), game.gameName(), game.game());
             gameDataAccess.updateGame(request.gameID(), newGame);
         }
-        else if (Objects.equals(request.playerColor(), "BLACK")){
+        else {
             String checkColor = game.blackUsername();
             if (checkColor != null){
                 throw new ResponseException(ResponseException.Code.TakenError, " Already taken");
