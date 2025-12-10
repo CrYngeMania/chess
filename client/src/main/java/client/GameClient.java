@@ -34,6 +34,7 @@ public class GameClient implements ServerMessageHandler{
             case LOAD_GAME -> {
                 LoadGameMessage lgm = serialiser.fromJson(message, LoadGameMessage.class);
                 game = lgm.getGame();
+                System.out.print("\n");
                 printBoard(out, null);
                 printPrompt();
             }
@@ -161,7 +162,12 @@ public class GameClient implements ServerMessageHandler{
 
     public String makeMove(String... params) throws ResponseException, InvalidMoveException {
 
+        if (params[0] == null || params[0].length() < 2) {
+            return "Hey, that's not valid, pal...";
+        }
+
         String startRowString = params[0].substring(0, 1);
+
         int startRow = getColumn(startRowString);
         int startCol = Integer.parseInt(params[0].substring(1));
         ChessPosition start = new ChessPosition(startCol, startRow);
@@ -172,7 +178,7 @@ public class GameClient implements ServerMessageHandler{
         ChessPosition end = new ChessPosition(endCol, endRow);
         ChessMove move = new ChessMove(start, end, null);
         ChessPiece piece = game.getBoard().getPiece(start);
-        if (piece.getPieceType() == PieceType.PAWN && (endRow == 8 || endRow == 1)){
+        if (piece.getPieceType() == PieceType.PAWN && (endCol == 8 || endCol == 1)){
             Scanner scanner = new Scanner(System.in);
             System.out.print("Promote to: (first letter) ");
             String answer = scanner.nextLine();
@@ -317,164 +323,32 @@ public class GameClient implements ServerMessageHandler{
     }
 
     private void printPiece(PrintStream out, ChessPiece piece, ChessPosition check, ChessPosition start) {
-        ChessGame.TeamColor color = piece.getTeamColor();
-        if (Objects.equals(ChessGame.TeamColor.BLACK, color)){
-            if (check.equals(start)){
-                printBlackHighlight(out, piece.getPieceType());
-            }
-            else{
-                printBlack(out, piece.getPieceType());
-            }
-        }
-        else{
-            if (check.equals(start)){
-                printWhiteHighlight(out, piece.getPieceType());
-            }
-            else{
-                printWhite(out, piece.getPieceType());
-            }
-        }
+        boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
+        boolean highlighted = check.equals(start);
+
+        printPieceSymbol(out, piece.getPieceType(), isWhite, highlighted);
     }
 
-    private void printBlack(PrintStream out, PieceType type) {
-        switch (type){
-            case PieceType.PAWN -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_PAWN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.ROOK -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_ROOK);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.BISHOP -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_BISHOP);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KNIGHT -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_KNIGHT);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.QUEEN -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_QUEEN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KING -> {
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(BLACK_KING);
-                out.print(RESET_TEXT_COLOR);
-            }
+    private void printPieceSymbol(PrintStream out, PieceType type, boolean isWhite, boolean highlighted) {
+
+        String colorCode = highlighted ? SET_TEXT_COLOR_BLACK : (isWhite ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_RED);
+
+        String symbol;
+        switch (type) {
+            case PAWN -> symbol = isWhite ? WHITE_PAWN : BLACK_PAWN;
+            case ROOK -> symbol = isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case BISHOP -> symbol = isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> symbol = isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case QUEEN -> symbol = isWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case KING -> symbol = isWhite ? WHITE_KING : BLACK_KING;
+            default -> throw new IllegalArgumentException("Unknown piece type: " + type);
         }
+
+        out.print(colorCode);
+        out.print(symbol);
+        out.print(RESET_TEXT_COLOR);
     }
 
-    private void printWhite(PrintStream out, PieceType type) {
-        switch (type){
-            case PieceType.PAWN -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_PAWN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.ROOK -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_ROOK);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.BISHOP -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_BISHOP);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KNIGHT -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_KNIGHT);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.QUEEN -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_QUEEN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KING -> {
-                out.print(SET_TEXT_COLOR_WHITE);
-                out.print(WHITE_KING);
-                out.print(RESET_TEXT_COLOR);
-            }
-        }
-    }
-
-    private void printBlackHighlight(PrintStream out, PieceType type) {
-        switch (type){
-            case PieceType.PAWN -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_PAWN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.ROOK -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_ROOK);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.BISHOP -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_BISHOP);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KNIGHT -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_KNIGHT);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.QUEEN -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_QUEEN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KING -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(BLACK_KING);
-                out.print(RESET_TEXT_COLOR);
-            }
-        }
-    }
-
-    private void printWhiteHighlight(PrintStream out, PieceType type) {
-        switch (type){
-            case PieceType.PAWN -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_PAWN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.ROOK -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_ROOK);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.BISHOP -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_BISHOP);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KNIGHT -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_KNIGHT);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.QUEEN -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_QUEEN);
-                out.print(RESET_TEXT_COLOR);
-            }
-            case PieceType.KING -> {
-                out.print(SET_TEXT_COLOR_BLACK);
-                out.print(WHITE_KING);
-                out.print(RESET_TEXT_COLOR);
-            }
-        }
-    }
 
     public void printBoard(PrintStream out, Collection<ChessMove> highlights){
         drawHeaders(out);

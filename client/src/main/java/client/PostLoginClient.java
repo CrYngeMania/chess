@@ -147,8 +147,6 @@ public class PostLoginClient {
                 server.joinGame(playerColor, gameID);
                 runGame(playerColor, (ChessGame) wantedGame.get("game"), gameID);
 
-                server.leaveGame(gameID);
-
                 return("");
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Error: Expected <ID> [WHITE|BLACK]");

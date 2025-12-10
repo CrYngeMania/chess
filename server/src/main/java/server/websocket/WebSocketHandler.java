@@ -68,6 +68,7 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
         ChessGame.TeamColor color;
 
         ChessGame.TeamColor player;
+        String colorUsername;
 
         GameData game = new MySqlGameDataAccess().getGame(gameID);
 
@@ -85,8 +86,12 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
 
         if (Objects.equals(username, game.blackUsername())){
             color = ChessGame.TeamColor.WHITE;
+            colorUsername = game.whiteUsername();
         }
-        else{color = ChessGame.TeamColor.BLACK;}
+        else{
+            color = ChessGame.TeamColor.BLACK;
+            colorUsername = game.blackUsername();
+        }
 
         if (game.game().isInCheckmate(color) || game.game().isInStalemate(color)){
             ErrorMessage msg = new ErrorMessage("The game's done! You can go home now :)");
@@ -110,7 +115,7 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
             }
 
             if (game.game().isInCheckmate(color)){
-                var message = String.format("%s wins! What a champ!", username);
+                var message = String.format("%s wins! What a champ! %s is caught in a checkmate!", username, colorUsername);
                 var notification = new GameNotificationMessage(message);
                 connections.broadcast(gameID, null, notification);
             }
@@ -122,17 +127,22 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
             LoadGameMessage update = new LoadGameMessage(game.game());
             connections.broadcast(gameID, null, update);
 
-            var initMessage = String.format("%s made a move!", username);
+            var initMessage = String.format("%s made a move (%s)!", username, moveCommand.getMove());
             var initNotification = new GameNotificationMessage(initMessage);
             connections.broadcast(gameID, session, initNotification);
 
             if (game.game().isInCheckmate(color)){
-                var message = String.format("%s wins! What a champ!", username);
+                var message = String.format("%s wins! What a champ! %s is caught in a checkmate!", username, colorUsername);
                 var notification = new GameNotificationMessage(message);
                 connections.broadcast(gameID, null, notification);
             }
             else if(game.game().isInStalemate(color)){
                 var message = "Oh dear..... looks like a stalemate :(";
+                var notification = new GameNotificationMessage(message);
+                connections.broadcast(gameID, null, notification);
+            }
+            else if (game.game().isInCheck(color)){
+                var message = String.format("%s is in check! Might want to fix that...", colorUsername);
                 var notification = new GameNotificationMessage(message);
                 connections.broadcast(gameID, null, notification);
             }
@@ -204,16 +214,28 @@ public class WebSocketHandler implements WsConnectHandler, WsCloseHandler, WsMes
 
     public void connect(String authToken, Integer gameID, Session session) throws IOException, ResponseException {
         String username = getUsername(authToken);
+        String type;
 
         connections.add(username, gameID, session);
         System.out.println("Websocket connected");
 
         GameData game = new MySqlGameDataAccess().getGame(gameID);
+
+        if (Objects.equals(username, game.blackUsername())){
+            type = "Black";
+        }
+        else if (Objects.equals(username, game.whiteUsername())){
+            type = "White";
+        }
+        else{
+            type = "Observer";
+        }
+
         ChessGame chess = game.game();
         LoadGameMessage load = new LoadGameMessage(chess);
         session.getRemote().sendString(new Gson().toJson(load));
 
-        var notification = new GameNotificationMessage(username + " entered the game!");
+        var notification = new GameNotificationMessage(username + " entered the game as " + type + "!");
         connections.broadcast(gameID, session, notification);
     }
 }
